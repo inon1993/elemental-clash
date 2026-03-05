@@ -1,0 +1,5285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental Clash</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a12;
+    --bg2: #10101e;
+    --surface: #16162a;
+    --border: #2a2a4a;
+    --gold: #c9a84c;
+    --gold2: #f0d080;
+    --text: #e8e0f0;
+    --text2: #9090b8;
+    --plant: #4caf50;
+    --wind: #80cbc4;
+    --ground: #a1887f;
+    --ice: #b3e5fc;
+    --water: #2196f3;
+    --stone: #78909c;
+    --electricity: #ffeb3b;
+    --fire: #ff5722;
+    --card-w: 110px;
+    --card-h: 160px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { overflow-x: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Raleway', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* STAR BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(60,20,100,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(20,40,100,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 60% 80%, rgba(100,20,40,0.2) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #stars {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.6s, transform 0.6s; }
+  .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+  /* START SCREEN */
+  #start-screen { flex-direction: column; gap: 40px; }
+  .game-title {
+    text-align: center;
+    max-width: 95%;
+    margin: 0 auto;
+  }
+  .game-title h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 3.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(201,168,76,0.4));
+    letter-spacing: 4px;
+    white-space: nowrap;
+  }
+  .title-initial {
+    font-size: 1.5em;
+    vertical-align: -0.2em;
+  }
+  .game-title p {
+    font-family: 'Cinzel', serif;
+    color: var(--text2);
+    font-size: clamp(0.55rem, 1.5vw, 0.9rem);
+    letter-spacing: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .cards-preview {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 700px;
+    padding: 0 20px;
+  }
+
+  .start-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 16px 60px;
+    background: linear-gradient(135deg, #c9a84c, #f0d080);
+    color: #0a0a12;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    font-weight: 700;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .start-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15) drop-shadow(0 0 20px rgba(201,168,76,0.6));
+  }
+
+  .menu-wrap {
+    position: relative;
+  }
+
+  .menu-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: linear-gradient(160deg, #16162e, #1e1e38);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 100;
+    min-width: 140px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.15s ease;
+  }
+  .menu-dropdown.open {
+    display: block;
+  }
+  .menu-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-transform: uppercase;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:hover { background: rgba(201,168,76,0.08); color: var(--gold); }
+
+  /* ===== GAME LOG MODAL ===== */
+  .log-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    animation: fadeInUp 0.25s ease;
+    padding: 20px;
+  }
+  .log-modal {
+    background: linear-gradient(160deg, #13132a, #1a1a32);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .log-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .log-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px rgba(201,168,76,0.4));
+  }
+  .log-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text2);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .log-close:hover { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); color: #ff8080; }
+  .log-body {
+    overflow-y: auto;
+    padding: 14px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201,168,76,0.3) transparent;
+  }
+  .log-empty {
+    text-align: center;
+    color: var(--text2);
+    font-size: 0.85rem;
+    padding: 30px 0;
+    letter-spacing: 1px;
+  }
+  .log-entry {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .log-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .log-round-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .log-result-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .log-result-badge.you-win { background: rgba(76,175,80,0.15); color: #80ff80; border: 1px solid #4caf5044; }
+  .log-result-badge.cpu-win { background: rgba(255,87,34,0.15); color: #ff8080; border: 1px solid #ff572244; }
+  .log-result-badge.tie     { background: rgba(128,128,128,0.15); color: #c0c0c0; border: 1px solid #80808044; }
+  .log-cards-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .log-card {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    flex: 1;
+    justify-content: center;
+  }
+  .log-card.winner-card { border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.06); }
+  .log-card.loser-card  { opacity: 0.5; }
+  .log-card-emoji { font-size: 1.1rem; }
+  .log-card-info { display: flex; flex-direction: column; }
+  .log-card-name { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 1px; color: var(--text); text-transform: uppercase; }
+  .log-card-pts  { font-size: 0.65rem; color: var(--gold2); font-family: 'Cinzel Decorative', serif; }
+  .log-vs { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text2); flex-shrink: 0; }
+  .log-reason { font-size: 0.72rem; color: var(--text2); text-align: center; letter-spacing: 0.5px; }
+  #game-screen {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .game-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* PLAYER AREAS */
+  .player-area {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transform-origin: center center;
+  }
+
+  .hand .card {
+    pointer-events: all;
+  }
+
+  .player-area.cpu-area {
+    background: linear-gradient(180deg, rgba(180,20,20,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255,80,80,0.1);
+  }
+
+  .player-area.user-area {
+    background: linear-gradient(0deg, rgba(20,80,180,0.08) 0%, transparent 100%);
+    border-top: 1px solid rgba(80,120,255,0.1);
+  }
+
+  .player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 140px;
+  }
+
+  .player-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  .player-score {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .player-score .score-label {
+    font-size: 0.55rem;
+    font-family: 'Cinzel', serif;
+    color: var(--text2);
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .player-score .score-value {
+    font-size: 2.8rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 0.9;
+    filter: drop-shadow(0 0 14px rgba(201,168,76,0.6));
+    letter-spacing: -1px;
+  }
+
+  .side-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+  }
+
+  .trash-inline {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .trash-inline span {
+    font-family: 'Cinzel', serif;
+    color: var(--text2);
+    font-size: 0.8rem;
+  }
+  .stack-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .stack-count {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  /* BATTLE ZONE */
+  .battle-zone {
+    flex: 0 0 220px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(180deg, rgba(201,168,76,0.02), rgba(201,168,76,0.05), rgba(201,168,76,0.02));
+    border-top: 1px solid rgba(201,168,76,0.1);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .battle-slot {
+    width: var(--card-w);
+    height: var(--card-h);
+    border: 2px dashed rgba(201,168,76,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: border-color 0.3s;
+  }
+
+  #cpu-slot  { left: 32px; }
+  #user-slot { right: 32px; }
+
+  .battle-slot.active-slot {
+    border-color: rgba(201,168,76,0.5);
+    box-shadow: 0 0 20px rgba(201,168,76,0.1);
+  }
+
+  .vs-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 1;
+  }
+
+  .vs-text {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    opacity: 0.6;
+    filter: drop-shadow(0 0 10px rgba(201,168,76,0.3));
+  }
+
+  .status-msg {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-align: center;
+    width: 140px;
+    min-height: 36px;
+    transition: color 0.3s;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .status-msg.highlight {
+    color: var(--gold2);
+  }
+
+  .round-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: var(--text2);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ===== CARD STYLES ===== */
+  .card {
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    transform-style: preserve-3d;
+    flex-shrink: 0;
+  }
+
+  .card:hover:not(.cpu-card):not(.back-card):not(.played):not(.disabled) {
+    transform: translateY(-16px) scale(1.05);
+  }
+  .draft-card-wrap .card:hover { transform: none !important; box-shadow: none !important; }
+
+  .card.selectable:hover {
+    box-shadow: 0 20px 40px rgba(201,168,76,0.3);
+    transform: translateY(-20px) scale(1.08);
+  }
+
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--surface);
+  }
+
+  .card.back-card .card-inner {
+    background: linear-gradient(135deg, #16162a, #1e1e38);
+    border-color: var(--border);
+    cursor: default;
+  }
+
+  .card-back-pattern {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    opacity: 0.3;
+  }
+  .card-back-pattern::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 9px;
+  }
+
+  .card-art {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-art::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.2;
+    border-radius: 2px;
+  }
+
+  .card-power {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 0 8px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5);
+    line-height: 1;
+    z-index: 2;
+  }
+
+  .card-name {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    z-index: 2;
+  }
+
+  .card-footer {
+    padding: 5px 6px 6px;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-footer-label {
+    display: none;
+  }
+
+  .strong-icons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .strong-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  }
+
+  /* Element color themes */
+  .card[data-type="plant"] .card-art { background: linear-gradient(135deg, #1a3a1a, #2d5a2d); }
+  .card[data-type="plant"] .card-inner { border-color: #4caf5066; }
+  .card[data-type="wind"] .card-art { background: linear-gradient(135deg, #1a3535, #1e4a47); }
+  .card[data-type="wind"] .card-inner { border-color: #80cbc466; }
+  .card[data-type="ground"] .card-art { background: linear-gradient(135deg, #2e1e18, #4a3028); }
+  .card[data-type="ground"] .card-inner { border-color: #a1887f66; }
+  .card[data-type="ice"] .card-art { background: linear-gradient(135deg, #1a2e40, #1e3a52); }
+  .card[data-type="ice"] .card-inner { border-color: #b3e5fc66; }
+  .card[data-type="water"] .card-art { background: linear-gradient(135deg, #0d1e40, #0d2456); }
+  .card[data-type="water"] .card-inner { border-color: #2196f366; }
+  .card[data-type="stone"] .card-art { background: linear-gradient(135deg, #1a1e22, #22282e); }
+  .card[data-type="stone"] .card-inner { border-color: #78909c66; }
+  .card[data-type="electricity"] .card-art { background: linear-gradient(135deg, #2e2800, #3a3200); }
+  .card[data-type="electricity"] .card-inner { border-color: #ffeb3b66; }
+  .card[data-type="fire"] .card-art { background: linear-gradient(135deg, #3a0d00, #5a1800); }
+  .card[data-type="fire"] .card-inner { border-color: #ff572266; }
+
+  /* Glow on hover */
+  .card[data-type="plant"].selectable:hover { box-shadow: 0 20px 40px rgba(76,175,80,0.3); }
+  .card[data-type="wind"].selectable:hover { box-shadow: 0 20px 40px rgba(128,203,196,0.3); }
+  .card[data-type="ground"].selectable:hover { box-shadow: 0 20px 40px rgba(161,136,127,0.3); }
+  .card[data-type="ice"].selectable:hover { box-shadow: 0 20px 40px rgba(179,229,252,0.3); }
+  .card[data-type="water"].selectable:hover { box-shadow: 0 20px 40px rgba(33,150,243,0.3); }
+  .card[data-type="stone"].selectable:hover { box-shadow: 0 20px 40px rgba(120,144,156,0.3); }
+  .card[data-type="electricity"].selectable:hover { box-shadow: 0 20px 40px rgba(255,235,59,0.3); }
+  .card[data-type="fire"].selectable:hover { box-shadow: 0 20px 40px rgba(255,87,34,0.3); }
+
+  /* Battle card glow */
+  .card.winner-card .card-inner {
+    box-shadow: 0 0 30px rgba(201,168,76,0.6), inset 0 0 20px rgba(201,168,76,0.1);
+    border-color: var(--gold);
+  }
+  .card.loser-card .card-inner {
+    opacity: 0.5;
+    filter: grayscale(0.5);
+  }
+
+  /* Animations */
+  @keyframes dealCard {
+    from { transform: translateY(-60px) scale(0.8); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes flyToSlot {
+    0% { transform: scale(1) translate(0, 0); opacity: 1; }
+    50% { transform: scale(1.1) translate(var(--tx), var(--ty)); opacity: 1; }
+    100% { transform: scale(1) translate(var(--tx2), var(--ty2)); opacity: 1; }
+  }
+  @keyframes winPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  @keyframes trashSlide {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.5) translateY(40px); opacity: 0; }
+  }
+  @keyframes pointsFloat {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-60px); opacity: 0; }
+  }
+  @keyframes cardSlideIn {
+    from { transform: translateX(var(--from-x, 0)) translateY(var(--from-y, -80px)) rotate(var(--from-rot, -10deg)); opacity: 0; }
+    to { transform: translateX(0) translateY(0) rotate(0deg); opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+  @keyframes coinFlip {
+    0% { transform: rotateY(0); }
+    100% { transform: rotateY(1800deg); }
+  }
+  @keyframes coinFlipUser {
+    0%   { transform: rotateY(0deg); }
+    100% { transform: rotateY(1800deg); } /* lands on front = user */
+  }
+  @keyframes coinFlipCpu {
+    0%   { transform: rotateY(0deg); }
+    100% { transform: rotateY(1980deg); } /* lands on back = cpu */
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glowPulse {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(201,168,76,0.4)); }
+    50% { filter: drop-shadow(0 0 25px rgba(201,168,76,0.8)); }
+  }
+  @keyframes battleShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  @keyframes particleBurst {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--px)), calc(-50% + var(--py))) scale(1); opacity: 0; }
+  }
+
+  .card.dealing {
+    animation: cardSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .card.played { cursor: default; animation: winPulse 0.4s ease; }
+
+  .float-points {
+    position: absolute;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    pointer-events: none;
+    animation: pointsFloat 1.5s ease forwards;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    animation: fadeInOverlay 0.3s ease forwards;
+  }
+  @keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .modal {
+    background: linear-gradient(135deg, #16162a, #1e1e38);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 60px;
+    text-align: center;
+    max-width: 480px;
+    position: relative;
+    overflow: hidden;
+    animation: modalEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes modalEntrance {
+    from { opacity: 0; transform: scale(0.7) translateY(40px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal.gameover-win {
+    border-color: rgba(201,168,76,0.5);
+    box-shadow: 0 0 60px rgba(201,168,76,0.2);
+  }
+  .modal.gameover-lose {
+    border-color: rgba(255,80,80,0.3);
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .modal-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    display: block;
+    animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+  @keyframes iconPop {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+  }
+  .modal-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.5));
+  }
+  .modal-subtitle {
+    font-family: 'Cinzel', serif;
+    color: var(--text2);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+  .modal-scores {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  .modal-score-item {
+    text-align: center;
+  }
+  .modal-score-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text2);
+    letter-spacing: 2px;
+  }
+  .modal-score-val {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--text);
+  }
+  .modal-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    padding: 12px 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a12;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .modal-btn:hover { filter: brightness(1.1) drop-shadow(0 0 15px rgba(201,168,76,0.5)); transform: scale(1.03); }
+
+  .modal-btn-secondary {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    clip-path: none;
+    border-radius: 4px;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    padding: 10px 30px;
+    letter-spacing: 2px;
+  }
+  .modal-btn-secondary:hover {
+    filter: none;
+    transform: scale(1.02);
+    border-color: var(--text2);
+    color: var(--text);
+  }
+
+  /* ===== MORE MENU ===== */
+  #more-screen {
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .more-menu {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .more-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    flex-shrink: 0;
+  }
+
+  .more-back-btn {
+    position: absolute;
+    left: 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px 0;
+  }
+  .more-back-btn:hover { color: var(--gold); }
+
+  .more-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    filter: drop-shadow(0 0 10px rgba(201,168,76,0.3));
+  }
+
+  .more-items {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex: 1;
+    align-items: center;
+  }
+
+  .more-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 10px;
+    min-height: 88px;
+    box-sizing: border-box;
+  }
+  .more-item:hover { background: rgba(201,168,76,0.07); border-color: rgba(201,168,76,0.25); }
+  .more-item-icon { font-size: 1.5rem; flex-shrink: 0; width: 36px; text-align: center; }
+  .more-item-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .more-item-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .more-item-desc {
+    font-size: 0.7rem;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+  }
+  .more-item-arrow {
+    font-size: 1.2rem;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+
+  /* ===== STATS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .stats-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-val {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 0.48rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-align: center;
+  }
+
+  /* ===== ACHIEVEMENTS MODAL ===== */
+  .achievement-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+  .achievement-row.unlocked {
+    border-color: rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.04);
+  }
+  .achievement-row.locked { opacity: 0.55; }
+  .achievement-row-icon { font-size: 1.6rem; flex-shrink: 0; width: 36px; text-align: center; margin-top: 2px; }
+  .achievement-row-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .achievement-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .achievement-row-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .ach-level-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 0.48rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.25);
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .ach-level-tag.locked-tag {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text2);
+  }
+  .ach-level-tag.maxed-tag {
+    background: rgba(201,168,76,0.2);
+    border-color: rgba(201,168,76,0.5);
+    color: var(--gold2);
+  }
+  .achievement-row-desc {
+    font-size: 0.68rem;
+    color: var(--text2);
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+  }
+  .ach-stars {
+    display: flex;
+    gap: 3px;
+    margin-top: 2px;
+  }
+  .ach-star {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.15);
+    line-height: 1;
+  }
+  .ach-star.earned { color: var(--gold); }
+  .achievement-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .achievement-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .achievement-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    border-radius: 2px;
+  }
+  .achievement-progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+
+  .survival-score-target {
+    font-family: 'Cinzel', serif;
+    font-size: 0.48rem;
+    letter-spacing: 1px;
+    color: var(--gold);
+    opacity: 0.7;
+    display: block;
+  }
+  .survival-score-target.hidden { display: none; }
+  .survival-preset {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    width: 76px;
+    height: 50px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .survival-preset.active, .survival-preset:hover {
+    background: rgba(201,168,76,0.12);
+    border-color: rgba(201,168,76,0.4);
+    color: var(--gold);
+  }
+
+
+  /* ===== DRAFT MODE ===== */
+  .draft-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 16px 16px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .draft-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .draft-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+  }
+  .draft-status {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+    min-height: 18px;
+  }
+  .draft-status.your-turn { color: #80ff80; }
+  .draft-status.cpu-turn  { color: #ff8080; }
+
+  .draft-picks {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .draft-picks-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .draft-picks-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .draft-picks-label.cpu-label  { color: #ff8080; }
+  .draft-picks-label.user-label { color: #80ff80; }
+  .draft-picks-hand {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .draft-pick-chip {
+    width: 36px;
+    height: 44px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    font-size: 1.1rem;
+    animation: cardSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  .draft-pick-chip.user-chip {
+    background: rgba(128,255,128,0.08);
+    border: 1px solid rgba(128,255,128,0.35);
+  }
+  .draft-pick-chip.cpu-chip {
+    background: rgba(255,128,128,0.08);
+    border: 1px solid rgba(255,128,128,0.35);
+  }
+  .draft-pick-chip-name {
+    font-family: 'Cinzel', serif;
+    font-size: 6px;
+    letter-spacing: 0;
+    color: var(--text2);
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+
+  .draft-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+  .draft-card-wrap {
+    position: relative;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: transform 0.2s;
+  }
+  .draft-card-wrap .card {
+    transition: opacity 0.4s ease, filter 0.4s ease;
+  }
+  .draft-card-wrap.picked .card {
+    opacity: 0.3;
+    filter: saturate(0.3);
+  }
+  .draft-picked-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    pointer-events: none;
+  }
+  .draft-card-wrap.picked-user .draft-picked-overlay {
+    background: rgba(128,255,128,0.15);
+    border: 2px solid rgba(128,255,128,0.5);
+  }
+  .draft-card-wrap.picked-cpu .draft-picked-overlay {
+    background: rgba(255,128,128,0.15);
+    border: 2px solid rgba(255,128,128,0.5);
+  }
+
+  /* ===== BLITZ TIMER ===== */
+  .blitz-timer {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    z-index: 2;
+  }
+  .blitz-timer.hidden { display: none; }
+  .blitz-ring {
+    width: 28px;
+    height: 28px;
+    transform: rotate(-90deg);
+  }
+  .blitz-ring-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 3;
+  }
+  .blitz-ring-fill {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+  .blitz-ring-fill.urgent { stroke: #ff5050; }
+  .blitz-timer-count {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.6rem;
+    color: var(--text);
+    line-height: 1;
+  }
+  .blitz-timer-count.urgent { color: #ff5050; }
+
+  /* ===== SURVIVAL ===== */
+  .survival-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .survival-progress.hidden { display: none; }
+  .survival-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 120px;
+  }
+  .survival-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .survival-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+  .user-bar { transform: scaleX(-1); } /* fills right-to-left toward center */
+  .user-fill { background: linear-gradient(90deg, #80ff80, #4caf50); }
+  .cpu-fill  { background: linear-gradient(90deg, #ff8080, #e53935); }
+  .survival-target-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    color: var(--gold);
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 24px;
+  }
+
+  /* ===== ACHIEVEMENT TOAST ===== */
+  .achievement-toast {
+    position: fixed;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #1a1a32, #22223a);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.15);
+    z-index: 9999;
+    transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    min-width: 240px;
+  }
+  .achievement-toast.visible { top: 16px; }
+  .achievement-toast-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .achievement-toast-text { display: flex; flex-direction: column; gap: 3px; }
+  .achievement-toast-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+  }
+  .achievement-toast-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .achievement-toast-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  /* ===== RIPPLE ===== */
+  .ripple {
+    position: fixed;
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+    background: rgba(201,168,76,0.5);
+    transform: scale(0);
+    animation: rippleOut 0.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  @keyframes draftPickUser {
+    0%   { box-shadow: 0 0 0px rgba(128,255,128,0); transform: scale(1); }
+    40%  { box-shadow: 0 0 30px rgba(128,255,128,0.8); transform: scale(1.06); }
+    100% { box-shadow: 0 0 0px rgba(128,255,128,0); transform: scale(1); }
+  }
+  @keyframes draftPickCpu {
+    0%   { box-shadow: 0 0 0px rgba(255,128,128,0); transform: scale(1); }
+    40%  { box-shadow: 0 0 30px rgba(255,128,128,0.8); transform: scale(1.06); }
+    100% { box-shadow: 0 0 0px rgba(255,128,128,0); transform: scale(1); }
+  }
+  .draft-card-wrap.pick-flash-user { animation: draftPickUser 0.4s ease forwards; }
+  .draft-card-wrap.pick-flash-cpu  { animation: draftPickCpu  0.4s ease forwards; }
+  .draft-card-wrap.picked .card { transition: opacity 0.35s ease; }
+
+  @keyframes rippleOut {
+    0%   { transform: scale(0); opacity: 0.8; }
+    100% { transform: scale(20); opacity: 0; }
+  }
+
+  /* ===== MATCH INDICATOR ===== */
+  .top-bar-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  .match-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .match-indicator.hidden { display: none; }
+  .match-sep {
+    font-size: 0.6rem;
+    color: var(--text2);
+    margin: 0 2px;
+  }
+  .match-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+  .match-dot.user-won {
+    background: #80ff80;
+    border-color: #80ff80;
+    box-shadow: 0 0 6px rgba(128,255,128,0.6);
+  }
+  .match-dot.cpu-won {
+    background: #ff8080;
+    border-color: #ff8080;
+    box-shadow: 0 0 6px rgba(255,128,128,0.6);
+  }
+
+  /* ===== TOP BAR ===== */
+  .top-bar {
+    flex: 0 0 auto;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 20px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 10;
+  }
+
+  .top-bar-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gold);
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+
+  .top-bar-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 12px;
+    height: 26px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text2);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .top-bar-btn:hover {
+    border-color: rgba(201,168,76,0.4);
+    color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* Coin modal */
+  .coin-wrapper {
+    width: 90px;
+    height: 90px;
+    perspective: 400px;
+    margin: 0 auto 20px;
+  }
+  .coin {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: coinFlip 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    box-shadow: 0 0 30px rgba(201,168,76,0.5);
+  }
+  .coin-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .coin-front {
+    background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c);
+    border: 3px solid rgba(255,255,255,0.2);
+  }
+  .coin-back {
+    background: linear-gradient(135deg, #a07830, #d0a050, #a07830);
+    border: 3px solid rgba(255,255,255,0.15);
+    transform: rotateY(180deg);
+  }
+  .coin-result-text {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .coin-result-text.visible {
+    opacity: 1;
+  }
+
+  /* Round result ribbon */
+  .round-result {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    padding: 8px 24px;
+    border-radius: 4px;
+    z-index: 50;
+    pointer-events: none;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    white-space: nowrap;
+    animation: ribbonIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .round-result.hiding {
+    animation: ribbonOut 0.2s ease-in forwards;
+  }
+  @keyframes ribbonIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  @keyframes ribbonOut {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    to   { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  }
+  .round-result.you-win { background: linear-gradient(135deg, #1a4a1a, #2d7a2d); color: #80ff80; border: 1px solid #4caf5088; }
+  .round-result.cpu-win { background: linear-gradient(135deg, #4a1a1a, #7a2d2d); color: #ff8080; border: 1px solid #ff572288; }
+  .round-result.tie { background: linear-gradient(135deg, #2a2a2a, #3a3a3a); color: #c0c0c0; border: 1px solid #80808088; }
+
+
+
+  /* Turn indicator */
+  .turn-indicator {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: all 0.5s;
+  }
+  .cpu-area .turn-indicator { top: 12px; background: #ff5050; box-shadow: 0 0 10px #ff505088; }
+  .user-area .turn-indicator { bottom: 12px; background: #50a0ff; box-shadow: 0 0 10px #50a0ff88; }
+  .turn-indicator.active { animation: glowPulse 1s infinite; }
+  .turn-indicator.inactive { opacity: 0.2; }
+
+  /* Particle container */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 200; }
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    --px: 0px; --py: 0px;
+    animation: particleBurst 0.8s ease forwards;
+  }
+
+
+
+  /* Stack card visual */
+  .stack-visual {
+    width: 50px;
+    height: 70px;
+    position: relative;
+    transition: transform 0.2s, filter 0.3s;
+    cursor: default;
+  }
+  .stack-visual.drawable {
+    cursor: pointer;
+    animation: stackGlow 1.2s ease-in-out infinite;
+  }
+  .stack-visual.drawable:hover {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 16px rgba(201,168,76,0.9));
+  }
+  @keyframes stackGlow {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(201,168,76,0.4)); transform: scale(1); }
+    50%       { filter: drop-shadow(0 0 18px rgba(201,168,76,0.9)); transform: scale(1.06); }
+  }
+  .stack-visual .sv-card {
+    position: absolute;
+    width: 50px;
+    height: 70px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #16162a, #1e1e38);
+    border: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+  .stack-visual.drawable .sv-card {
+    border-color: rgba(201,168,76,0.6);
+  }
+  .stack-visual .sv-card:nth-child(1) { transform: rotate(-3deg) translate(-2px, 2px); }
+  .stack-visual .sv-card:nth-child(2) { transform: rotate(1deg) translate(1px, -1px); }
+  .stack-visual .sv-card:nth-child(3) { transform: rotate(0deg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+  @media (max-width: 600px) {
+    :root { --card-w: 85px; --card-h: 125px; }
+    .player-area { padding: 10px 16px; }
+    .vs-divider { padding: 0 20px; }
+    .battle-zone { flex: 0 0 180px; }
+  }
+
+  .start-btns {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .start-btns-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+  .start-btns-row .how-btn {
+    height: 44px;
+    line-height: 44px;
+    padding: 0 24px;
+  }
+
+  .how-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0 40px;
+    height: 44px;
+    line-height: 44px;
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.4);
+    color: var(--gold);
+    cursor: pointer;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: all 0.3s;
+  }
+  .how-btn:hover {
+    background: rgba(201,168,76,0.08);
+    border-color: var(--gold);
+    filter: drop-shadow(0 0 10px rgba(201,168,76,0.3));
+  }
+
+  .battle-btns {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  .info-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+  }
+  .info-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  /* ===== HOW TO PLAY MODAL ===== */
+  .htp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.35s ease;
+    padding: 20px;
+  }
+
+  .htp-modal {
+    background: linear-gradient(160deg, #13132a, #1a1a32);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201,168,76,0.3) transparent;
+  }
+  .htp-modal::-webkit-scrollbar { width: 4px; }
+  .htp-modal::-webkit-scrollbar-track { background: transparent; }
+  .htp-modal::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+
+  .htp-header {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(160deg, #13132a, #1a1a32);
+    padding: 28px 32px 16px;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .htp-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    filter: drop-shadow(0 0 12px rgba(201,168,76,0.4));
+  }
+
+  .htp-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text2);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .htp-close:hover { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); color: #ff8080; }
+
+  .htp-body {
+    padding: 24px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .htp-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .htp-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(201,168,76,0.3), transparent);
+  }
+
+  .htp-text {
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* Setup steps */
+  .htp-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .htp-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .htp-step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a12;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .htp-step-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .htp-step-text strong {
+    color: var(--gold2);
+    font-weight: 600;
+  }
+
+  /* Turn flow diagram */
+  .htp-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .htp-flow-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text);
+    min-width: 90px;
+  }
+  .htp-flow-item .fi-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+  .htp-flow-item .fi-label { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 1px; color: var(--text2); text-transform: uppercase; }
+  .htp-flow-arrow {
+    color: var(--gold);
+    font-size: 1rem;
+    opacity: 0.6;
+  }
+  .htp-flow-item.highlight-item {
+    border-color: rgba(201,168,76,0.3);
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* Battle example */
+  .htp-battle-example {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+  }
+  .htp-mini-card {
+    width: 72px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .htp-mini-card .mc-art {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+  }
+  .htp-mini-card .mc-power {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  }
+  .htp-mini-card .mc-footer {
+    padding: 4px;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    font-size: 0.7rem;
+  }
+  .htp-mini-card.fire-card .mc-art { background: linear-gradient(135deg, #3a0d00, #5a1800); border-color: #ff572266; }
+  .htp-mini-card.plant-card .mc-art { background: linear-gradient(135deg, #1a3a1a, #2d5a2d); border-color: #4caf5066; }
+  .htp-mini-card.water-card .mc-art { background: linear-gradient(135deg, #0d1e40, #0d2456); border-color: #2196f366; }
+  .htp-mini-card.elec-card .mc-art { background: linear-gradient(135deg, #2e2800, #3a3200); border-color: #ffeb3b66; }
+  .htp-mini-card.fire-card { border-color: #ff572266; }
+  .htp-mini-card.plant-card { border-color: #4caf5066; }
+  .htp-mini-card.water-card { border-color: #2196f366; }
+  .htp-mini-card.elec-card { border-color: #ffeb3b66; }
+
+  .htp-vs { font-family: 'Cinzel Decorative', serif; font-size: 1.1rem; color: var(--gold); opacity: 0.7; }
+  .htp-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+  }
+  .htp-result-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .htp-result-badge.win { background: rgba(76,175,80,0.2); color: #80ff80; border: 1px solid #4caf5044; }
+  .htp-result-badge.lose { background: rgba(255,87,34,0.2); color: #ff8060; border: 1px solid #ff572244; }
+  .htp-result-pts { font-size: 0.75rem; color: var(--text2); }
+  .htp-result-pts strong { color: var(--gold2); }
+
+  /* Cards table */
+  .htp-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .htp-card-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .htp-card-row .cr-emoji { font-size: 1.5rem; }
+  .htp-card-row .cr-name { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; }
+  .htp-card-row .cr-power { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text); }
+  .htp-card-row .cr-strong { font-size: 0.85rem; display: flex; gap: 3px; justify-content: center; }
+  .htp-card-row .cr-label { font-size: 0.5rem; color: var(--text2); letter-spacing: 1px; }
+
+  .htp-tip {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 10px;
+    align-items: flex-start;
+  }
+  .htp-tip-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .htp-tip-text { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+  .htp-tip-text strong { color: var(--gold2); }
+
+  /* ===== ORBITAL RING ===== */
+  .orbit-ring {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    flex-shrink: 0;
+    animation: orbitSpin 18s linear infinite;
+  }
+  @keyframes orbitSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .orbit-node {
+    position: absolute;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: var(--surface);
+    animation: orbitCounterSpin 18s linear infinite;
+    cursor: default;
+  }
+  @keyframes orbitCounterSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+  }
+  /* element colours */
+  .orbit-node[data-type="plant"]       { background: linear-gradient(135deg,#1a3a1a,#2d5a2d); border-color:#4caf5066; }
+  .orbit-node[data-type="wind"]        { background: linear-gradient(135deg,#1a3535,#1e4a47); border-color:#80cbc466; }
+  .orbit-node[data-type="ground"]      { background: linear-gradient(135deg,#2e1e18,#4a3028); border-color:#a1887f66; padding-bottom: 6px; }
+  .orbit-node[data-type="ice"]         { background: linear-gradient(135deg,#1a2e40,#1e3a52); border-color:#b3e5fc66; }
+  .orbit-node[data-type="water"]       { background: linear-gradient(135deg,#0d1e40,#0d2456); border-color:#2196f366; }
+  .orbit-node[data-type="stone"]       { background: linear-gradient(135deg,#1a1e22,#22282e); border-color:#78909c66; }
+  .orbit-node[data-type="electricity"] { background: linear-gradient(135deg,#2e2800,#3a3200); border-color:#ffeb3b66; }
+  .orbit-node[data-type="fire"]        { background: linear-gradient(135deg,#3a0d00,#5a1800); border-color:#ff572266; }
+  /* pause on hover - removed, ring always rotates */
+  .orbit-ring:hover .orbit-node { animation-play-state: running; }
+
+  /* ===== SETTINGS ===== */
+  .settings-gear-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 1.4rem;
+    background: none;
+    border: none;
+    color: rgba(201,168,76,0.5);
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.2s, transform 0.3s;
+    z-index: 10;
+    line-height: 1;
+  }
+  .settings-gear-btn:hover { color: var(--gold); transform: rotate(45deg); }
+  .settings-item { cursor: default; }
+  .settings-item:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .settings-toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .settings-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .settings-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 26px;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+  .settings-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  .settings-toggle input:checked + .settings-slider {
+    background: rgba(201,168,76,0.3);
+    border-color: rgba(201,168,76,0.5);
+  }
+  .settings-toggle input:checked + .settings-slider::before {
+    transform: translateX(22px);
+    background: var(--gold);
+  }
+
+  /* ===== TUTORIAL ===== */
+  .tut-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: none;
+  }
+  .tut-overlay-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tut-overlay-centered .tut-box {
+    position: relative;
+    top: auto;
+    left: auto;
+  }
+  .tut-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+  .tut-backdrop-block {
+    pointer-events: all;
+  }
+  .tut-box {
+    position: absolute;
+    background: linear-gradient(135deg, #16162a, #1e1e38);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 16px;
+    padding: 20px 24px;
+    max-width: 340px;
+    width: calc(100vw - 48px);
+    pointer-events: all;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 30px rgba(201,168,76,0.1);
+    animation: tutBoxIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes tutBoxIn {
+    from { opacity: 0; transform: scale(0.85) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .tut-step {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 3px;
+    color: rgba(201,168,76,0.6);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .tut-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.95rem;
+    color: var(--gold);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .tut-body {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .tut-body strong { color: var(--text); }
+  .tut-calc {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+  .tut-calc .pts-user { color: #80ff80; }
+  .tut-calc .pts-cpu  { color: #ff8080; }
+  .tut-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .tut-skip {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.25);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .tut-skip:hover { color: rgba(255,255,255,0.5); }
+  .tut-next {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: #111;
+    background: var(--gold);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+  .tut-next:hover { opacity: 0.85; }
+  .tut-arrow {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: #1e1e38;
+    border: 1px solid rgba(201,168,76,0.4);
+    transform: rotate(45deg);
+    left: 50%;
+    margin-left: -6px;
+  }
+  .tut-arrow.up   { top: -7px;    border-bottom: none; border-right: none; }
+  .tut-arrow.down { bottom: -7px; border-top: none;    border-left: none;  }
+  .tut-highlight-pulse {
+    position: absolute;
+    border: 2px solid rgba(201,168,76,0.8);
+    border-radius: 10px;
+    pointer-events: none;
+    animation: tutPulse 1.5s ease-in-out infinite;
+    z-index: 2001;
+  }
+  @keyframes tutPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+  }
+
+  /* ===== EASTER EGG ===== */
+  .orbit-ring.egg-clash {
+    animation: none !important;
+  }
+  .orbit-ring.egg-clash .orbit-node {
+    animation: none !important;
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                top  0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s ease,
+                opacity 0.4s ease;
+  }
+  .orbit-ring.egg-clash .orbit-node.egg-center {
+    left: calc(50% - 27px) !important;
+    top:  calc(50% - 27px) !important;
+    transform: scale(1.4) rotate(720deg) !important;
+  }
+  .orbit-ring.egg-clash .orbit-node.egg-scatter {
+    transform: scale(0) !important;
+    opacity: 0 !important;
+  }
+  .egg-flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, #fff 0%, #ffe066 30%, #ff8800 60%, transparent 100%);
+    z-index: 99999;
+    pointer-events: none;
+    opacity: 0;
+    animation: eggFlash 1.2s ease-out forwards;
+  }
+  @keyframes eggFlash {
+    0%   { opacity: 0;   transform: scale(0.2); }
+    20%  { opacity: 1;   transform: scale(1); }
+    60%  { opacity: 0.8; }
+    100% { opacity: 0;   transform: scale(1.5); }
+  }
+
+
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div id="particles"></div>
+
+<!-- START SCREEN -->
+<div class="screen" id="start-screen">
+  <button class="settings-gear-btn" onclick="openSettings()" aria-label="Settings">⚙️</button>
+  <div class="game-title">
+    <h1><span class="title-initial">E</span>LEMENTAL <span class="title-initial">C</span>LASH</h1>
+    <p>A Game of Elements &amp; Power</p>
+  </div>
+  <div class="orbit-ring" id="orbit-ring"></div>
+  <div class="start-btns">
+    <button class="start-btn" onclick="startGame()">Begin Battle</button>
+    <div class="start-btns-row">
+      <button class="how-btn" onclick="openModesScreen()">⚔ Modes</button>
+      <button class="how-btn" onclick="openMoreMenu()">··· More</button>
+    </div>
+    <button class="how-btn" onclick="openHowToPlay()">? How to Play</button>
+  </div>
+</div>
+
+<!-- SETTINGS SCREEN -->
+<div class="screen hidden" id="settings-screen">
+  <div class="more-menu">
+    <div class="more-header">
+      <button class="more-back-btn" onclick="closeSettings()">← Back</button>
+      <div class="more-title">SETTINGS</div>
+    </div>
+    <div class="more-items">
+      <div class="htp-section-title" style="max-width:360px;width:100%;margin-bottom:10px;">Audio &amp; Feedback</div>
+      <div class="more-item settings-item">
+        <span class="more-item-icon">🔊</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Sound</div>
+          <div class="more-item-desc">Card plays, round results & game events</div>
+        </div>
+        <label class="settings-toggle">
+          <input type="checkbox" id="sound-toggle" onchange="saveSetting('sound', this.checked)">
+          <span class="settings-slider"></span>
+        </label>
+      </div>
+      <div class="more-item settings-item">
+        <span class="more-item-icon">📳</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Vibration</div>
+          <div class="more-item-desc">Haptic feedback on actions & results</div>
+        </div>
+        <label class="settings-toggle">
+          <input type="checkbox" id="haptic-toggle" onchange="saveSetting('haptic', this.checked)">
+          <span class="settings-slider"></span>
+        </label>
+      </div>
+      <div class="htp-section-title" style="max-width:360px;width:100%;margin-bottom:10px;margin-top:8px;">Data</div>
+      <div class="more-item settings-item" onclick="showResetGameDataConfirm()" style="cursor:pointer;">
+        <span class="more-item-icon">🗑️</span>
+        <div class="more-item-text">
+          <div class="more-item-label" style="color:rgba(255,80,80,0.7)">Reset Game Data</div>
+          <div class="more-item-desc">Wipe all stats & achievements</div>
+        </div>
+        <span class="more-item-arrow" style="color:rgba(255,80,80,0.4)">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODES SCREEN -->
+<div class="screen hidden" id="modes-screen">
+  <div class="more-menu">
+    <div class="more-header">
+      <button class="more-back-btn" onclick="closeModesScreen()">← Back</button>
+      <div class="more-title">MODES</div>
+    </div>
+    <div class="more-items">
+      <button class="more-item" onclick="startBo3()">
+        <span class="more-item-icon">👑</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Best of 3</div>
+          <div class="more-item-desc">Win 2 out of 3 games to claim the match</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+      <button class="more-item" onclick="openBlitzConfig()">
+        <span class="more-item-icon">⏱️</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Blitz</div>
+          <div class="more-item-desc">Play before the timer runs out or a random card is played for you</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+      <button class="more-item" onclick="startDraft()">
+        <span class="more-item-icon">🎭</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Draft</div>
+          <div class="more-item-desc">Take turns picking your 4 cards before the battle begins</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+      <button class="more-item" onclick="openSurvivalConfig()">
+        <span class="more-item-icon">♾️</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Survival</div>
+          <div class="more-item-desc">Race to a target score before the CPU does</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAFT SCREEN -->
+<div class="screen hidden" id="draft-screen">
+  <div class="draft-layout">
+    <div class="draft-header">
+      <div class="draft-title">DRAFT</div>
+      <div class="draft-status" id="draft-status"></div>
+    </div>
+    <div class="draft-picks">
+      <div class="draft-picks-col">
+        <div class="draft-picks-label cpu-label">⚔ CPU</div>
+        <div class="draft-picks-hand" id="draft-cpu-picks"></div>
+      </div>
+      <div class="draft-picks-col">
+        <div class="draft-picks-label user-label">🛡 You</div>
+        <div class="draft-picks-hand" id="draft-user-picks"></div>
+      </div>
+    </div>
+    <div class="draft-grid" id="draft-grid"></div>
+  </div>
+</div>
+
+<!-- MORE MENU SCREEN -->
+<div class="screen hidden" id="more-screen">
+  <div class="more-menu">
+    <div class="more-header">
+      <button class="more-back-btn" onclick="closeMoreMenu()">← Back</button>
+      <div class="more-title">MORE</div>
+    </div>
+    <div class="more-items">
+      <button class="more-item" onclick="openStats()">
+        <span class="more-item-icon">📊</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Statistics</div>
+          <div class="more-item-desc">Your game history &amp; performance</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+      <button class="more-item" onclick="openAchievements()">
+        <span class="more-item-icon">🏆</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Achievements</div>
+          <div class="more-item-desc">Badges &amp; challenges to unlock</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen hidden" id="game-screen">
+  <div class="game-layout">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <button class="top-bar-btn" onclick="goHome()">⌂ Home</button>
+      <div class="top-bar-center">
+        <div class="top-bar-title" id="top-bar-title">ELEMENTAL CLASH</div>
+        <div class="match-indicator hidden" id="match-indicator">
+          <span class="match-dot" id="match-dot-user-0"></span>
+          <span class="match-dot" id="match-dot-user-1"></span>
+          <span class="match-sep">·</span>
+          <span class="match-dot" id="match-dot-cpu-0"></span>
+          <span class="match-dot" id="match-dot-cpu-1"></span>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <button class="top-bar-btn" onclick="toggleMenu()">☰ Menu</button>
+        <div class="menu-dropdown" id="game-menu">
+          <button class="menu-item" onclick="openGameLog(); closeMenu()">📜 Game Log</button>
+          <button class="menu-item" onclick="openHowToPlay(); closeMenu()">? Rules</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CPU Area -->
+    <div class="player-area cpu-area">
+      <div class="turn-indicator inactive" id="cpu-turn-ind"></div>
+      <div class="player-info">
+        <div class="player-name">⚔ CPU</div>
+        <div class="player-score"><span class="score-label">Score</span><span class="score-value" id="cpu-score">0</span><span class="survival-score-target hidden" id="cpu-score-target"></span></div>
+        <div class="trash-inline">🗑 <span id="cpu-trash-count">0</span></div>
+      </div>
+      <div class="hand" id="cpu-hand"></div>
+      <div class="side-area">
+        <div class="stack-label" id="cpu-pile-label" style="display:none">CPU Pile</div>
+        <div class="stack-visual" id="cpu-stack-visual" style="display:none;opacity:0.2">
+          <div class="sv-card"></div>
+          <div class="sv-card"></div>
+          <div class="sv-card">🂠</div>
+        </div>
+        <div class="stack-count" id="cpu-stack-count" style="display:none">2</div>
+      </div>
+    </div>
+
+    <!-- Battle Zone -->
+    <div class="battle-zone" id="battle-zone">
+      <div class="blitz-timer hidden" id="blitz-timer">
+        <svg class="blitz-ring" viewBox="0 0 36 36">
+          <circle class="blitz-ring-bg" cx="18" cy="18" r="15.9"/>
+          <circle class="blitz-ring-fill" id="blitz-ring-fill" cx="18" cy="18" r="15.9"/>
+        </svg>
+        <span class="blitz-timer-count" id="blitz-timer-count">5</span>
+      </div>
+      <div class="battle-slot" id="cpu-slot"><span style="color:var(--text2);font-size:0.65rem;letter-spacing:2px;">CPU</span></div>
+      <div class="vs-divider">
+        <div class="vs-text">VS</div>
+        <div class="status-msg" id="status-msg">Flipping coin...</div>
+        <div class="round-badge">Round <span id="round-num">1</span></div>
+        <div class="survival-progress hidden" id="survival-progress">
+          <div class="survival-bar-wrap">
+            <div class="survival-bar cpu-bar"><div class="survival-fill cpu-fill" id="survival-cpu-fill"></div></div>
+            <div class="survival-target-label" id="survival-target-label">0</div>
+            <div class="survival-bar user-bar"><div class="survival-fill user-fill" id="survival-user-fill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="battle-slot" id="user-slot"><span style="color:var(--text2);font-size:0.65rem;letter-spacing:2px;">YOU</span></div>
+    </div>
+
+    <!-- User Area -->
+    <div class="player-area user-area">
+      <div class="turn-indicator inactive" id="user-turn-ind"></div>
+      <div class="player-info">
+        <div class="player-name">🛡 You</div>
+        <div class="player-score"><span class="score-label">Score</span><span class="score-value" id="user-score">0</span><span class="survival-score-target hidden" id="user-score-target"></span></div>
+        <div class="trash-inline">🗑 <span id="trash-count">0</span></div>
+      </div>
+      <div class="hand" id="user-hand"></div>
+      <div class="side-area">
+        <div class="stack-label">Draw Pile</div>
+        <div class="stack-visual" id="stack-visual" onclick="userDrawCard()">
+          <div class="sv-card"></div>
+          <div class="sv-card"></div>
+          <div class="sv-card">🂠</div>
+        </div>
+        <div class="stack-count" id="stack-count">4</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STARS =====
+(function() {
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const stars = Array.from({length: 120}, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.5 + 0.3,
+    a: Math.random(),
+    speed: Math.random() * 0.002 + 0.001
+  }));
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.a += s.speed;
+      ctx.beginPath();
+      ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.sin(s.a) * 0.3})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CARD DATA =====
+const CARDS = [
+  { type: 'plant',       label: 'Plant',   power: 1, emoji: '🌿', strong: ['water', 'ground'],       color: '#4caf50' },
+  { type: 'wind',        label: 'Wind',    power: 2, emoji: '💨', strong: ['fire', 'plant'],          color: '#80cbc4' },
+  { type: 'ground',      label: 'Ground',  power: 3, emoji: '⛰️', strong: ['fire', 'electricity'],    color: '#a1887f' },
+  { type: 'ice',         label: 'Ice',     power: 4, emoji: '❄️',  strong: ['water', 'plant'],         color: '#b3e5fc' },
+  { type: 'water',       label: 'Water',   power: 5, emoji: '💧', strong: ['fire', 'stone'],         color: '#2196f3' },
+  { type: 'stone',       label: 'Stone',   power: 6, emoji: '🪨', strong: ['fire', 'plant'],          color: '#78909c' },
+  { type: 'electricity', label: 'Elec.',   power: 7, emoji: '⚡', strong: ['water', 'wind'],          color: '#ffeb3b' },
+  { type: 'fire',        label: 'Fire',    power: 8, emoji: '🔥', strong: ['plant', 'ice'],           color: '#ff5722' },
+];
+
+const TYPE_EMOJI = {
+  plant: '🌿', wind: '💨', ground: '⛰️', ice: '❄️',
+  water: '💧', stone: '🪨', electricity: '⚡', fire: '🔥'
+};
+
+// ===== GAME STATE =====
+let state = {
+  stack: [],
+  userHand: [],
+  cpuHand: [],
+  userScore: 0,
+  cpuScore: 0,
+  trash: [],
+  currentTurn: null,
+  firstPlayer: null,
+  round: 1,
+  phase: 'idle',
+  userPlayedCard: null,
+  cpuPlayedCard: null,
+  drawsNeeded: [],
+  gameLog: [],
+};
+
+// ===== BUILD ORBITAL RING =====
+function buildStartPreview() {
+  const ring = document.getElementById('orbit-ring');
+  const count = CARDS.length;
+  const radius = 112;
+
+  CARDS.forEach((c, i) => {
+    const angle = (i / count) * 360;
+    const rad = (angle - 90) * (Math.PI / 180);
+    const x = Math.round(Math.cos(rad) * radius);
+    const y = Math.round(Math.sin(rad) * radius);
+
+    const node = document.createElement('div');
+    node.className = 'orbit-node';
+    node.dataset.type = c.type;
+    node.textContent = c.emoji;
+    // Position: centred in ring (50%/50%) then offset by x/y
+    node.style.left = `calc(50% + ${x}px - 27px)`;
+    node.style.top  = `calc(50% + ${y}px - 27px)`;
+    node.style.margin = '0';
+    // Keep absolute positioning, override the default margin centering
+    node.style.position = 'absolute';
+    ring.appendChild(node);
+  });
+}
+
+// ===== SETTINGS =====
+let _settings = { sound: true, haptic: true };
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ec_settings') || '{}');
+    _settings.sound  = saved.sound  !== false;
+    _settings.haptic = saved.haptic !== false;
+  } catch(e) {}
+  document.getElementById('sound-toggle').checked  = _settings.sound;
+  document.getElementById('haptic-toggle').checked = _settings.haptic;
+}
+
+function saveSetting(key, val) {
+  _settings[key] = val;
+  try { localStorage.setItem('ec_settings', JSON.stringify(_settings)); } catch(e) {}
+}
+
+function openSettings() {
+  playSound('btn'); haptic('light');
+  history.pushState({ screen: 'settings' }, '');
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('settings-screen').classList.remove('hidden');
+}
+
+function showResetGameDataConfirm() {
+  haptic('light');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <span class="modal-icon">🗑️</span>
+      <div class="modal-title" style="font-size:1rem">Reset Game Data?</div>
+      <div class="modal-subtitle">All stats & achievements will be permanently erased. Settings will be kept.</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+        <button class="modal-btn" style="background:linear-gradient(135deg,#7a1a1a,#a02020);width:100%;" onclick="confirmResetGameData()">Yes, Reset Everything</button>
+        <button class="modal-btn modal-btn-secondary" style="width:100%;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function confirmResetGameData() {
+  try {
+    localStorage.removeItem('elemental_clash_stats');
+    localStorage.removeItem(TUTORIAL_KEY);
+  } catch(e) {}
+  document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+  haptic('medium');
+  closeSettings();
+  setTimeout(() => showToast('🗑️', 'Data Reset', 'All game data cleared', 'rgba(255,80,80,0.4)'), 300);
+}
+
+function closeSettings() {
+  document.getElementById('settings-screen').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+}
+
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx = null;
+
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new AudioCtx();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function haptic(style = 'light') {
+  if (!_settings.haptic) return;
+  if (!navigator.vibrate) return;
+  const patterns = { light: 15, medium: 30, heavy: 60, success: [30, 50, 80], fail: [60, 40, 60], clash: [20, 30, 20, 30, 80] };
+  navigator.vibrate(patterns[style] || 15);
+}
+
+function playSound(type) {
+  if (!_settings.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+
+    switch (type) {
+
+      case 'card': { // whoosh
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.25, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const f = ctx.createBiquadFilter();
+        f.type = 'bandpass'; f.frequency.setValueAtTime(1800, t); f.frequency.exponentialRampToValueAtTime(400, t + 0.25);
+        f.Q.value = 0.8;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        src.connect(f); f.connect(g); g.connect(ctx.destination);
+        src.start(t); break;
+      }
+
+      case 'win': { // bright chime
+        [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.3]].forEach(([freq, delay]) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t + delay);
+          g.gain.linearRampToValueAtTime(0.18, t + delay + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.4);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t + delay); o.stop(t + delay + 0.5);
+        }); break;
+      }
+
+      case 'lose': { // low thud
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.35);
+        g.gain.setValueAtTime(0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.45); break;
+      }
+
+      case 'tie': { // neutral blip
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 440;
+        g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.25); break;
+      }
+
+      case 'gamewin': { // fanfare
+        [[392, 0, 0.15], [523, 0.15, 0.15], [659, 0.3, 0.15], [784, 0.45, 0.3], [1047, 0.6, 0.5]].forEach(([freq, delay, dur]) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'triangle'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t + delay);
+          g.gain.linearRampToValueAtTime(0.22, t + delay + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.001, t + delay + dur);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t + delay); o.stop(t + delay + dur + 0.05);
+        }); break;
+      }
+
+      case 'gamelose': { // defeat
+        [[330, 0, 0.3], [277, 0.25, 0.3], [220, 0.5, 0.5]].forEach(([freq, delay, dur]) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sawtooth'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.2, t + delay); g.gain.exponentialRampToValueAtTime(0.001, t + delay + dur);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t + delay); o.stop(t + delay + dur + 0.05);
+        }); break;
+      }
+
+      case 'draft': { // satisfying click
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(400, t + 0.08);
+        g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.12); break;
+      }
+
+      case 'btn': { // subtle tick
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 600;
+        g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.1); break;
+      }
+
+      case 'clash': { // easter egg boom
+        // Explosion noise
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 1.5, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.5);
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 800;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+        src.connect(f); f.connect(g); g.connect(ctx.destination);
+        src.start(t);
+        // High pitched ring
+        const o = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(1200, t); o.frequency.exponentialRampToValueAtTime(200, t + 1.0);
+        g2.gain.setValueAtTime(0.3, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+        o.connect(g2); g2.connect(ctx.destination);
+        o.start(t); o.stop(t + 1.0); break;
+      }
+    }
+  } catch(e) {}
+}
+
+
+let _eggTaps = 0;
+let _eggTimer = null;
+let _eggActive = false;
+
+function initEasterEgg() {
+  const ring = document.getElementById('orbit-ring');
+  ring.style.cursor = 'pointer';
+
+  ring.addEventListener('click', () => {
+    if (_eggActive) return;
+    _eggTaps++;
+
+    // Reset tap counter after 3s inactivity
+    clearTimeout(_eggTimer);
+    _eggTimer = setTimeout(() => { _eggTaps = 0; }, 3000);
+
+    if (_eggTaps >= 5) {
+      _eggTaps = 0;
+      clearTimeout(_eggTimer);
+      triggerEasterEgg();
+    }
+  });
+}
+
+function triggerEasterEgg() {
+  _eggActive = true;
+  const ring = document.getElementById('orbit-ring');
+  const nodes = ring.querySelectorAll('.orbit-node');
+
+  // Stop orbit, move all nodes to center
+  ring.classList.add('egg-clash');
+  nodes.forEach(n => n.classList.add('egg-center'));
+
+  // Flash after nodes converge
+  setTimeout(() => {
+    playSound('clash'); haptic('clash');
+    const flash = document.createElement('div');
+    flash.className = 'egg-flash';
+    document.body.appendChild(flash);
+
+    // Scatter nodes outward
+    nodes.forEach(n => {
+      n.classList.remove('egg-center');
+      n.classList.add('egg-scatter');
+    });
+
+    // Remove flash
+    setTimeout(() => flash.remove(), 1200);
+
+    // Restore everything
+    setTimeout(() => {
+      ring.classList.remove('egg-clash');
+      nodes.forEach(n => {
+        n.classList.remove('egg-center', 'egg-scatter');
+      });
+      _eggActive = false;
+    }, 1800);
+
+  }, 700);
+}
+
+// ===== CARD DOM ELEMENT =====
+function createCardEl(cardData, faceDown = false, onClick = null) {
+  const div = document.createElement('div');
+  div.className = 'card' + (faceDown ? ' back-card' : '');
+  if (!faceDown) div.dataset.type = cardData.type;
+
+  if (faceDown) {
+    div.innerHTML = `<div class="card-inner"><div class="card-back-pattern">⚜</div></div>`;
+  } else {
+    const strongIcons = cardData.strong.map(t => `<span class="strong-icon">${TYPE_EMOJI[t]}</span>`).join('');
+    div.innerHTML = `
+      <div class="card-inner">
+        <div class="card-name">${cardData.label}</div>
+        <div class="card-power">${cardData.power}</div>
+        <div class="card-art" style="font-size:2.6rem">${cardData.emoji}</div>
+        <div class="card-footer">
+          <div class="strong-icons">${strongIcons}</div>
+        </div>
+      </div>
+    `;
+  }
+  div._cardData = cardData;
+  if (onClick) {
+    div.addEventListener('click', onClick);
+    div.classList.add('selectable');
+  }
+  return div;
+}
+
+// ===== RENDER HANDS =====
+function renderHands() {
+  // CPU hand (face down)
+  const cpuHand = document.getElementById('cpu-hand');
+  cpuHand.innerHTML = '';
+  state.cpuHand.forEach(() => {
+    const el = createCardEl(null, true);
+    cpuHand.appendChild(el);
+  });
+
+  // User hand
+  const userHand = document.getElementById('user-hand');
+  userHand.innerHTML = '';
+  const canPlay = (state.phase === 'play-first' || state.phase === 'play-second') && state.currentTurn === 'user';
+  state.userHand.forEach((card, i) => {
+    const el = createCardEl(card, false, canPlay ? () => userPlayCard(i) : null);
+    el.style.animationDelay = i * 0.08 + 's';
+    userHand.appendChild(el);
+  });
+  
+  document.getElementById('cpu-score').textContent = state.cpuScore;
+  document.getElementById('user-score').textContent = state.userScore;
+  const stackCount = draft ? (state.userStack || []).length : state.stack.length;
+  document.getElementById('stack-count').textContent = stackCount;
+
+  // CPU pile — only visible in draft mode
+  const cpuPileEls = ['cpu-pile-label', 'cpu-stack-visual', 'cpu-stack-count'];
+  if (draft) {
+    const cpuCount = (state.cpuStack || []).length;
+    cpuPileEls.forEach(id => document.getElementById(id).style.display = '');
+    document.getElementById('cpu-stack-count').textContent = cpuCount;
+    document.getElementById('cpu-stack-visual').style.opacity = cpuCount > 0 ? '1' : '0.2';
+  } else {
+    cpuPileEls.forEach(id => document.getElementById(id).style.display = 'none');
+  }
+  document.getElementById('trash-count').textContent = state.trash.length;
+  document.getElementById('cpu-trash-count').textContent = state.trash.length;
+  document.getElementById('round-num').textContent = state.round;
+
+  // Stack glow when user should draw
+  const sv = document.getElementById('stack-visual');
+  const drawPile = draft ? (state.userStack || []) : state.stack;
+  sv.style.opacity = drawPile.length > 0 ? '1' : '0.2';
+  if (state.phase === 'draw-user' && state.currentTurn === 'user' && drawPile.length > 0) {
+    sv.classList.add('drawable');
+  } else {
+    sv.classList.remove('drawable');
+  }
+}
+
+function updateTurnIndicators() {
+  const cpuInd = document.getElementById('cpu-turn-ind');
+  const userInd = document.getElementById('user-turn-ind');
+  if (state.currentTurn === 'cpu') {
+    cpuInd.className = 'turn-indicator active';
+    userInd.className = 'turn-indicator inactive';
+  } else {
+    userInd.className = 'turn-indicator active';
+    cpuInd.className = 'turn-indicator inactive';
+  }
+}
+
+function setStatus(msg, highlight = false) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (highlight ? ' highlight' : '');
+}
+
+// ===== PARTICLES =====
+function burst(x, y, color, count = 12) {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 40 + Math.random() * 60;
+    p.style.cssText = `
+      left: ${x}px; top: ${y}px;
+      background: ${color};
+      --px: ${Math.cos(angle) * dist}px;
+      --py: ${Math.sin(angle) * dist}px;
+      animation-duration: ${0.6 + Math.random() * 0.4}s;
+    `;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+
+function floatPoints(el, points, color) {
+  const rect = el.getBoundingClientRect();
+  const p = document.createElement('div');
+  p.className = 'float-points';
+  p.textContent = '+' + points;
+  p.style.cssText = `left:${rect.left + rect.width/2}px;top:${rect.top}px;color:${color};transform:translateX(-50%)`;
+  document.getElementById('particles').appendChild(p);
+  setTimeout(() => p.remove(), 1500);
+}
+
+// ===== GAME FLOW =====
+// Phase machine:
+//   'coin'       → flipping coin
+//   'draw-user'  → user must click Draw Card
+//   'draw-cpu'   → cpu is drawing (automated)
+//   'play-first' → first player plays (could be user or cpu)
+//   'play-second'→ second player plays
+//   'resolve'    → animating result
+//   'gameover'   → done
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame() {
+  if (!isTutorialDone()) { startTutorial(); return; }
+  playSound('btn'); haptic('medium');
+  history.pushState({ screen: 'game' }, '');
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+
+  const deck = shuffle([...CARDS]);
+  state.userHand = [deck.pop(), deck.pop()];
+  state.cpuHand = [deck.pop(), deck.pop()];
+  state.stack = deck;
+  state.userScore = 0;
+  state.cpuScore = 0;
+  state.trash = [];
+  state.round = 1;
+  state.firstPlayer = null;   // who goes first this round
+  state.userPlayedCard = null;
+  state.cpuPlayedCard = null;
+  state.phase = 'coin';
+
+  clearBattleSlots();
+  document.getElementById('user-hand').innerHTML = '';
+  document.getElementById('cpu-hand').innerHTML = '';
+  setTimeout(doCoinFlip, 400);
+}
+
+function clearBattleSlots() {
+  document.getElementById('cpu-slot').innerHTML = '<span style="color:var(--text2);font-size:0.65rem;letter-spacing:2px;">CPU</span>';
+  document.getElementById('user-slot').innerHTML = '<span style="color:var(--text2);font-size:0.65rem;letter-spacing:2px;">YOU</span>';
+}
+
+function doCoinFlip() {
+  const goesFirst = Math.random() < 0.5 ? 'user' : 'cpu';
+  const userWins = goesFirst === 'user';
+  const resultText = userWins ? '🛡 You Go First!' : '⚔ CPU Goes First!';
+  const flipAnim = userWins ? 'coinFlipUser' : 'coinFlipCpu';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="coin-wrapper">
+        <div class="coin" id="flip-coin" style="animation: ${flipAnim} 1.6s cubic-bezier(0.4,0,0.2,1) forwards">
+          <div class="coin-face coin-front">🛡</div>
+          <div class="coin-face coin-back">⚔</div>
+        </div>
+      </div>
+      <div class="modal-title">Coin Flip!</div>
+      <div class="modal-subtitle coin-result-text" id="coin-result">${resultText}</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Reveal result text after flip lands
+  setTimeout(() => {
+    const el = document.getElementById('coin-result');
+    if (el) el.classList.add('visible');
+    recordCoinFlip(userWins);
+  }, 1700);
+
+  setTimeout(() => {
+    overlay.remove();
+    state.firstPlayer = goesFirst;
+    beginRound();
+  }, 2800);
+}
+
+// Called at the start of every round
+function isGameActive() {
+  return !document.getElementById('game-screen').classList.contains('hidden');
+}
+
+function beginRound() {
+  if (!isGameActive()) return;
+  state.userPlayedCard = null;
+  state.cpuPlayedCard = null;
+  state.drawsNeeded = []; // queue of who still needs to draw
+  clearBattleSlots();
+  renderHands();
+
+  if (state.round > 1) {
+    // In draft mode, each player draws from their own pile independently
+    const userPile = draft ? state.userStack : state.stack;
+    const cpuPile  = draft ? state.cpuStack  : state.stack;
+    const second   = state.firstPlayer === 'user' ? 'cpu' : 'user';
+
+    if (draft) {
+      // Build draw queue only for players who still have cards in their pile
+      state.drawsNeeded = [];
+      if ((state.firstPlayer === 'user' ? userPile : cpuPile).length > 0) state.drawsNeeded.push(state.firstPlayer);
+      if ((second === 'user' ? userPile : cpuPile).length > 0) state.drawsNeeded.push(second);
+    } else if (state.stack.length > 0) {
+      state.drawsNeeded = [state.firstPlayer, second];
+    }
+
+    if (state.drawsNeeded.length > 0) {
+      processNextDraw();
+    } else {
+      beginPlayPhase();
+    }
+  } else {
+    beginPlayPhase();
+  }
+}
+
+function processNextDraw() {
+  if (!isGameActive()) return;
+  const getPile = (who) => draft ? (who === 'user' ? state.userStack : state.cpuStack) : state.stack;
+  if (state.drawsNeeded.length === 0 || getPile(state.drawsNeeded[0]).length === 0) {
+    // Skip anyone with empty pile
+    state.drawsNeeded = state.drawsNeeded.filter(who => getPile(who).length > 0);
+    if (state.drawsNeeded.length === 0) { beginPlayPhase(); return; }
+  }
+  const who = state.drawsNeeded[0];
+  if (who === 'cpu') {
+    state.phase = 'draw-cpu';
+    state.currentTurn = 'cpu';
+    updateTurnIndicators();
+    setStatus('CPU is drawing...');
+    renderHands();
+    setTimeout(() => {
+      drawCardFor('cpu');
+      state.drawsNeeded.shift();
+      processNextDraw();
+    }, 1000);
+  } else {
+    state.phase = 'draw-user';
+    state.currentTurn = 'user';
+    updateTurnIndicators();
+    setStatus('Draw a card first');
+    renderHands();
+    // user clicks the Draw button → userDrawCard() → processNextDraw()
+  }
+}
+
+function drawCardFor(who) {
+  // In draft mode, each player draws from their own personal stack
+  const pile = draft ? (who === 'user' ? state.userStack : state.cpuStack) : state.stack;
+  if (!pile || pile.length === 0) return;
+  const card = pile.pop();
+  if (who === 'user') {
+    state.userHand.push(card);
+  } else {
+    state.cpuHand.push(card);
+  }
+  animateNewCard(who === 'user' ? 'user-hand' : 'cpu-hand');
+
+  // Survival: silently refill pile when last card is drawn
+  if (survival && state.stack.length === 0) {
+    const inPlay = [...state.userHand, ...state.cpuHand];
+    const inPlayTypes = new Set(inPlay.map(c => c.type));
+    const refillCards = CARDS.filter(c => !inPlayTypes.has(c.type));
+    state.stack = shuffle([...refillCards]);
+    state.trash = [];
+  }
+}
+
+function animateNewCard(handId) {
+  renderHands();
+  const hand = document.getElementById(handId);
+  const lastCard = hand.lastElementChild;
+  if (lastCard) {
+    lastCard.style.animation = 'none';
+    lastCard.style.setProperty('--from-y', handId === 'user-hand' ? '80px' : '-80px');
+    lastCard.style.setProperty('--from-rot', '5deg');
+    requestAnimationFrame(() => {
+      lastCard.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
+    });
+  }
+}
+
+function userDrawCard() {
+  if (state.phase !== 'draw-user') return;
+  drawCardFor('user');
+  state.drawsNeeded.shift();
+  processNextDraw();
+}
+
+function beginPlayPhase() {
+  if (!isGameActive()) return;
+  state.currentTurn = state.firstPlayer;
+  state.phase = 'play-first';
+  updateTurnIndicators();
+
+  if (state.firstPlayer === 'user') {
+    setStatus('Your turn — choose a card');
+    renderHands();
+    startBlitzTimer();
+  } else {
+    setStatus('CPU goes first...');
+    renderHands();
+    setTimeout(() => { if (state.phase !== 'abandoned') cpuPlayCard(); }, 1800);
+  }
+}
+
+// CPU AI: smart card selection
+function cpuPickCardIndex() {
+  const hand = state.cpuHand;
+  const isSecond = !!state.userPlayedCard; // CPU plays after user
+  const userCard = state.userPlayedCard;
+
+  // Score each card in hand
+  const scored = hand.map((cpuCard, i) => {
+    let score = 0;
+
+    if (isSecond) {
+      // === CPU plays SECOND — user card is known, play optimally ===
+      const cpuBeatsUser = cpuCard.strong.includes(userCard.type);
+      const userBeatsCpu = userCard.strong.includes(cpuCard.type);
+
+      if (cpuBeatsUser && !userBeatsCpu) {
+        // Winning by type — prefer the card with highest combined points
+        score = 1000 + cpuCard.power + userCard.power;
+      } else if (!cpuBeatsUser && !userBeatsCpu) {
+        // Pure power battle — only play if we win on power
+        if (cpuCard.power > userCard.power) {
+          score = 500 + cpuCard.power;
+        } else {
+          // We lose on power — play our weakest card to minimise loss
+          score = 100 - cpuCard.power;
+        }
+      } else {
+        // User has type advantage — we lose regardless, play weakest card
+        score = 50 - cpuCard.power;
+      }
+
+    } else {
+      // === CPU plays FIRST — user hand is known, play strategically ===
+      const userHand = state.userHand;
+
+      // Count how many user cards this cpu card beats
+      const counters = userHand.filter(uc => cpuCard.strong.includes(uc.type)).length;
+      // Count how many user cards beat this cpu card
+      const vulnerabilities = userHand.filter(uc => uc.strong.includes(cpuCard.type)).length;
+      // Count neutral matchups we'd win on power
+      const powerWins = userHand.filter(uc =>
+        !cpuCard.strong.includes(uc.type) && !uc.strong.includes(cpuCard.type) && cpuCard.power > uc.power
+      ).length;
+
+      score = (counters * 30)         // strongly reward type counters
+            + (powerWins * 10)        // reward power wins
+            - (vulnerabilities * 25)  // punish vulnerability
+            + cpuCard.power;          // tiebreak by power
+    }
+
+    return { i, score };
+  });
+
+  // Pick the highest scored card; add tiny randomness to feel less robotic
+  scored.sort((a, b) => b.score - a.score);
+
+  // 20% chance to pick 2nd best if available (prevents perfect predictability)
+  if (scored.length > 1 && Math.random() < 0.2) {
+    return scored[1].i;
+  }
+  return scored[0].i;
+}
+
+function cpuPlayCard() {
+  if (!isGameActive()) return;
+  if (state.currentTurn !== 'cpu') return;
+  const idx = cpuPickCardIndex();
+  const card = state.cpuHand.splice(idx, 1)[0];
+  state.cpuPlayedCard = card;
+
+  const cpuSlot = document.getElementById('cpu-slot');
+  cpuSlot.innerHTML = '';
+  const cardEl = createCardEl(card);
+  cardEl.classList.add('played');
+  cardEl.style.setProperty('--from-y', '-60px');
+  cardEl.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
+  cpuSlot.appendChild(cardEl);
+
+  if (state.userPlayedCard) {
+    // CPU was second — resolve
+    setStatus('CPU played ' + card.label + '!');
+    state.phase = 'resolve';
+    renderHands();
+    setTimeout(() => { if (state.phase !== 'abandoned') resolveRound(); }, 1200);
+  } else {
+    // CPU was first — switch to user
+    setStatus('CPU played ' + card.label + '! Your turn.');
+    state.currentTurn = 'user';
+    state.phase = 'play-second';
+    updateTurnIndicators();
+    renderHands();
+    startBlitzTimer();
+  }
+}
+
+function userPlayCard(index) {
+  if (state.currentTurn !== 'user') return;
+  if (state.phase !== 'play-first' && state.phase !== 'play-second') return;
+  clearBlitzTimer();
+
+  const card = state.userHand.splice(index, 1)[0];
+  state.userPlayedCard = card;
+  playSound('card'); haptic('light');
+  // Dismiss tutorial hint if active
+  if (tutorial && tutorial.active) removeTutHint('tut-hint-choose');
+
+  const userSlot = document.getElementById('user-slot');
+  userSlot.innerHTML = '';
+  const cardEl = createCardEl(card);
+  cardEl.classList.add('played');
+  cardEl.style.setProperty('--from-y', '60px');
+  cardEl.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
+  userSlot.appendChild(cardEl);
+
+  if (state.cpuPlayedCard) {
+    // User was second — resolve
+    setStatus('You played ' + card.label + '!');
+    state.phase = 'resolve';
+    renderHands();
+    setTimeout(() => { if (state.phase !== 'abandoned') resolveRound(); }, 1200);
+  } else {
+    // User was first — CPU plays second
+    setStatus('You played ' + card.label + '! CPU responds...');
+    state.currentTurn = 'cpu';
+    state.phase = 'play-second';
+    updateTurnIndicators();
+    renderHands();
+    setTimeout(() => { if (state.phase !== 'abandoned') cpuPlayCard(); }, 1500);
+  }
+}
+
+function resolveRound() {
+  if (!isGameActive()) return;
+  const uCard = state.userPlayedCard;
+  const cCard = state.cpuPlayedCard;
+
+  const uStrong = uCard.strong.includes(cCard.type);
+  const cStrong = cCard.strong.includes(uCard.type);
+
+  let winner = 'tie';
+  let userPts = 0, cpuPts = 0;
+  let reason = '';
+
+  if (uStrong && !cStrong) {
+    winner = 'user';
+    userPts = uCard.power + cCard.power;
+    reason = uCard.type + ' beats ' + cCard.type + '!';
+  } else if (cStrong && !uStrong) {
+    winner = 'cpu';
+    cpuPts = uCard.power + cCard.power;
+    reason = cCard.type + ' beats ' + uCard.type + '!';
+  } else {
+    // Both strong or neither — compare power
+    if (uCard.power > cCard.power) {
+      winner = 'user';
+      userPts = uCard.power;
+      reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
+    } else if (cCard.power > uCard.power) {
+      winner = 'cpu';
+      cpuPts = cCard.power;
+      reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
+    } else {
+      winner = 'tie';
+      reason = 'Tie — no points!';
+    }
+  }
+
+  state.userScore += userPts;
+  state.cpuScore += cpuPts;
+
+  // Update survival progress bars
+  if (survival) updateSurvivalProgress();
+
+  // Log this round
+  state.gameLog.push({
+    round: state.round,
+    userCard: uCard,
+    cpuCard: cCard,
+    winner,
+    userPts,
+    cpuPts,
+    reason,
+  });
+
+  const cpuSlot = document.getElementById('cpu-slot');
+  const userSlot = document.getElementById('user-slot');
+  const cpuCardEl = cpuSlot.querySelector('.card');
+  const userCardEl = userSlot.querySelector('.card');
+
+  // Shake
+  const bz = document.getElementById('battle-zone');
+  bz.style.animation = 'battleShake 0.4s ease';
+  setTimeout(() => { bz.style.animation = ''; }, 400);
+
+  if (winner === 'user') {
+    playSound('win'); haptic('success');
+    cpuCardEl && cpuCardEl.classList.add('loser-card');
+    userCardEl && userCardEl.classList.add('winner-card');
+    if (userCardEl) {
+      const r = userCardEl.getBoundingClientRect();
+      burst(r.left + r.width/2, r.top + r.height/2, '#4caf50');
+      if (userPts) floatPoints(userCardEl, userPts, '#80ff80');
+    }
+  } else if (winner === 'cpu') {
+    playSound('lose'); haptic('fail');
+    userCardEl && userCardEl.classList.add('loser-card');
+    cpuCardEl && cpuCardEl.classList.add('winner-card');
+    if (cpuCardEl) {
+      const r = cpuCardEl.getBoundingClientRect();
+      burst(r.left + r.width/2, r.top + r.height/2, '#ff5050');
+      if (cpuPts) floatPoints(cpuCardEl, cpuPts, '#ff8080');
+    }
+  }
+
+  const ribbon = document.createElement('div');
+  ribbon.className = 'round-result ' + (winner === 'user' ? 'you-win' : winner === 'cpu' ? 'cpu-win' : 'tie');
+  ribbon.textContent = winner === 'user' ? '✦ You Win! ✦' : winner === 'cpu' ? '✦ CPU Wins ✦' : '✦ Tie ✦';
+  if (winner === 'tie') { playSound('tie'); haptic('light'); }
+  bz.appendChild(ribbon);
+  setStatus(reason, true);
+
+  setTimeout(() => {
+    // Animate ribbon out
+    ribbon.classList.add('hiding');
+    setTimeout(() => {
+      if (state.phase === 'abandoned') return;
+      ribbon.remove();
+
+      // Tutorial: show explainer and pause — it handles advancing rounds itself
+      if (tutorial && tutorial.active) {
+        showTutRoundExplainer(uCard, cCard, winner, userPts, cpuPts);
+        return;
+      }
+
+      state.trash.push(uCard, cCard);
+      state.userPlayedCard = null;
+      state.cpuPlayedCard = null;
+      state.round++;
+
+      // Survival: refill deck if needed
+      if (survival) refillDeckIfNeeded();
+
+      // Survival: check if target reached
+      if (survival && checkSurvivalWin()) return;
+
+      // Game over when both hands empty AND stack empty (normal mode)
+      const userPileEmpty = draft ? (state.userStack || []).length === 0 : state.stack.length === 0;
+      const cpuPileEmpty  = draft ? (state.cpuStack  || []).length === 0 : true;
+      const gameOver = !survival && state.userHand.length === 0 && state.cpuHand.length === 0 && userPileEmpty && cpuPileEmpty;
+      if (gameOver) {
+        renderHands();
+        setTimeout(() => { if (state.phase !== 'abandoned') showGameOver(); }, 500);
+        return;
+      }
+
+      // Winner goes first next round; tie keeps same first player
+      if (winner === 'user') state.firstPlayer = 'user';
+      else if (winner === 'cpu') state.firstPlayer = 'cpu';
+
+      renderHands();
+      setTimeout(() => { if (state.phase !== 'abandoned') beginRound(); }, 600);
+    }, 220);
+  }, 1800);
+}
+
+function showGameOver() {
+  const userWon = state.userScore > state.cpuScore;
+  const tie = state.userScore === state.cpuScore;
+  recordGameStats(userWon, tie);
+  checkAchievements(userWon, tie);
+  if (userWon) { playSound('gamewin'); haptic('success'); }
+  else if (!tie) { playSound('gamelose'); haptic('fail'); }
+  else { playSound('tie'); haptic('light'); }
+
+  // Clean up survival UI (keep config for potential restart)
+  const wasSurvival = !!survival;
+  clearBlitzTimer();
+  document.getElementById('survival-progress').classList.add('hidden');
+  document.getElementById('user-score-target').classList.add('hidden');
+  document.getElementById('cpu-score-target').classList.add('hidden');
+
+  // BO3 mode
+  if (match) {
+    showBo3GameOver(userWon, tie);
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal ${tie ? '' : userWon ? 'gameover-win' : 'gameover-lose'}">
+      <span class="modal-icon">${tie ? '⚖️' : userWon ? '🏆' : '💀'}</span>
+      <div class="modal-title">${tie ? 'A Draw!' : userWon ? 'Victory!' : 'Defeat!'}</div>
+      <div class="modal-subtitle">${tie ? 'Equally matched...' : userWon ? 'The elements bow to you' : 'The CPU claims the throne'}</div>
+      <div class="modal-scores">
+        <div class="modal-score-item">
+          <div class="modal-score-name">You</div>
+          <div class="modal-score-val" style="color:${userWon?'#80ff80':'var(--text)'}">${state.userScore}</div>
+        </div>
+        <div class="modal-score-item">
+          <div class="modal-score-name">CPU</div>
+          <div class="modal-score-val" style="color:${!userWon&&!tie?'#ff8080':'var(--text)'}">${state.cpuScore}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();restartGame()">Play Again</button>
+        <button class="modal-btn modal-btn-secondary" onclick="openGameLog()">📜 Game Log</button>
+        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();goHome()">⌂ Home</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function goHome() {
+  document.getElementById('user-hand').innerHTML = '';
+  document.getElementById('cpu-hand').innerHTML = '';
+  clearBattleSlots();
+  clearBlitzTimer();
+  document.querySelectorAll('.modal-overlay, .round-result').forEach(el => el.remove());
+  match = null;
+  survival = null;
+  blitz = null;
+  draft = null;
+  updateMatchIndicator();
+  document.getElementById('draft-screen').classList.add('hidden');
+  document.getElementById('draft-grid').innerHTML = '';
+  document.getElementById('draft-cpu-picks') && (document.getElementById('draft-cpu-picks').innerHTML = '');
+  document.getElementById('draft-user-picks') && (document.getElementById('draft-user-picks').innerHTML = '');
+  document.getElementById('survival-progress').classList.add('hidden');
+  document.getElementById('user-score-target').classList.add('hidden');
+  document.getElementById('cpu-score-target').classList.add('hidden');
+  state = {
+    stack: [], userHand: [], cpuHand: [],
+    userScore: 0, cpuScore: 0, trash: [],
+    currentTurn: null, firstPlayer: null,
+    round: 1, phase: 'abandoned',
+    userPlayedCard: null, cpuPlayedCard: null,
+    drawsNeeded: [], gameLog: [],
+  };
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+}
+
+function restartGame() {
+  clearBattleSlots();
+  clearBlitzTimer();
+
+  // Preserve current mode for rematch
+  const prevBlitz    = blitz;
+  const prevSurvival = survival;
+  const prevDraft    = draft;
+
+  match = null;
+  blitz = null;
+  survival = null;
+  draft = null;
+  updateMatchIndicator();
+
+  state = {
+    stack: [], userHand: [], cpuHand: [],
+    userScore: 0, cpuScore: 0, trash: [],
+    currentTurn: null, firstPlayer: null,
+    round: 1, phase: 'idle',
+    userPlayedCard: null, cpuPlayedCard: null,
+    drawsNeeded: [], gameLog: [],
+  };
+
+  if (prevDraft !== null) {
+    // Re-run the full draft
+    document.getElementById('game-screen').classList.add('hidden');
+    draft = { userHand: [], cpuHand: [] };
+    const goesFirst = Math.random() < 0.5 ? 'user' : 'cpu';
+    showDraftCoinFlip(goesFirst);
+    return;
+  }
+
+  // Restore other modes
+  blitz    = prevBlitz;
+  survival = prevSurvival;
+
+  startGame();
+}
+
+// ===== HOW TO PLAY =====
+function openHowToPlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'htp-overlay';
+  overlay.id = 'htp-overlay';
+  overlay.innerHTML = `
+    <div class="htp-modal">
+      <div class="htp-header">
+        <div class="htp-title">⚔ How to Play</div>
+        <button class="htp-close" onclick="closeHowToPlay()">✕</button>
+      </div>
+      <div class="htp-body">
+
+        <!-- OVERVIEW -->
+        <div>
+          <div class="htp-section-title">The Game</div>
+          <p class="htp-text">Elemental Clash is a 2-player card game. You face the CPU in a battle of elemental cards. Play the right element at the right time — type advantages beat raw power!</p>
+        </div>
+
+        <!-- SETUP -->
+        <div>
+          <div class="htp-section-title">Setup</div>
+          <div class="htp-steps">
+            <div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text">There are <strong>8 elemental cards</strong> in the deck. Each player is dealt <strong>2 cards</strong> to start. The remaining 4 cards form the <strong>draw pile</strong>.</div></div>
+            <div class="htp-step"><div class="htp-step-num">2</div><div class="htp-step-text">A <strong>coin is flipped</strong> to decide who plays first.</div></div>
+            <div class="htp-step"><div class="htp-step-num">3</div><div class="htp-step-text">From <strong>round 2 onwards</strong>, both players draw 1 card from the pile before playing. The first player draws first — when the pile <strong>glows gold</strong>, click it to draw your card!</div></div>
+          </div>
+        </div>
+
+        <!-- TURN FLOW -->
+        <div>
+          <div class="htp-section-title">Each Round</div>
+          <div class="htp-flow">
+            <div class="htp-flow-item highlight-item"><span class="fi-icon">🪙</span><span class="fi-label">Draw card<br>(round 2+)</span></div>
+            <div class="htp-flow-arrow">→</div>
+            <div class="htp-flow-item highlight-item"><span class="fi-icon">🃏</span><span class="fi-label">1st player<br>plays</span></div>
+            <div class="htp-flow-arrow">→</div>
+            <div class="htp-flow-item highlight-item"><span class="fi-icon">🃏</span><span class="fi-label">2nd player<br>plays</span></div>
+            <div class="htp-flow-arrow">→</div>
+            <div class="htp-flow-item highlight-item"><span class="fi-icon">⚡</span><span class="fi-label">Battle<br>resolves</span></div>
+            <div class="htp-flow-arrow">→</div>
+            <div class="htp-flow-item highlight-item"><span class="fi-icon">🏆</span><span class="fi-label">Winner goes<br>first next</span></div>
+          </div>
+        </div>
+
+        <!-- SCORING -->
+        <div>
+          <div class="htp-section-title">Winning a Round</div>
+          <p class="htp-text" style="margin-bottom:14px">Two things determine who wins each clash: <strong style="color:var(--gold2)">type advantage</strong> and <strong style="color:var(--gold2)">card power</strong>.</p>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <!-- Example 1: type wins -->
+            <div class="htp-battle-example">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:0.6rem;letter-spacing:2px;color:var(--text2);font-family:'Cinzel', serif">YOU</div>
+                <div class="htp-mini-card plant-card">
+                  <div class="mc-power">1</div>
+                  <div class="mc-art">🌿</div>
+                  <div class="mc-footer">💧⛰️</div>
+                </div>
+              </div>
+              <div class="htp-vs">VS</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:0.6rem;letter-spacing:2px;color:var(--text2);font-family:'Cinzel', serif">CPU</div>
+                <div class="htp-mini-card water-card">
+                  <div class="mc-power">5</div>
+                  <div class="mc-art">💧</div>
+                  <div class="mc-footer">🔥🪨</div>
+                </div>
+              </div>
+              <div class="htp-result">
+                <div class="htp-result-badge win">✦ You Win!</div>
+                <div class="htp-result-pts">Plant beats Water (type advantage)<br>Points: <strong>1 + 5 = +6</strong></div>
+              </div>
+            </div>
+            <div class="htp-tip" style="padding:10px 14px">
+              <div class="htp-tip-icon">💡</div>
+              <div class="htp-tip-text"><strong>Type advantage always wins</strong>, no matter the power difference. Here Plant (power 1) beats Water (power 5) because Plant is strong against Water. You earn <strong>both cards' power</strong> combined.</div>
+            </div>
+
+            <!-- Example 2: power wins -->
+            <div class="htp-battle-example" style="margin-top:4px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:0.6rem;letter-spacing:2px;color:var(--text2);font-family:'Cinzel', serif">YOU</div>
+                <div class="htp-mini-card elec-card">
+                  <div class="mc-power">7</div>
+                  <div class="mc-art">⚡</div>
+                  <div class="mc-footer">💧💨</div>
+                </div>
+              </div>
+              <div class="htp-vs">VS</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:0.6rem;letter-spacing:2px;color:var(--text2);font-family:'Cinzel', serif">CPU</div>
+                <div class="htp-mini-card fire-card">
+                  <div class="mc-power">8</div>
+                  <div class="mc-art">🔥</div>
+                  <div class="mc-footer">🌿❄️</div>
+                </div>
+              </div>
+              <div class="htp-result">
+                <div class="htp-result-badge lose">✦ CPU Wins</div>
+                <div class="htp-result-pts">No type advantage — higher power wins<br>CPU earns: <strong>+8 points</strong></div>
+              </div>
+            </div>
+            <div class="htp-tip" style="padding:10px 14px">
+              <div class="htp-tip-icon">💡</div>
+              <div class="htp-tip-text">When <strong>neither card has a type advantage</strong>, the higher power wins. The winner earns <strong>only their own card's power</strong> as points.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALL CARDS -->
+        <div>
+          <div class="htp-section-title">All 8 Cards</div>
+          <div class="htp-cards-grid">
+            <div class="htp-card-row"><div class="cr-emoji">🌿</div><div class="cr-name">Plant</div><div class="cr-power">PWR 1</div><div class="cr-label">beats</div><div class="cr-strong">💧⛰️</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">💨</div><div class="cr-name">Wind</div><div class="cr-power">PWR 2</div><div class="cr-label">beats</div><div class="cr-strong">🔥🌿</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">⛰️</div><div class="cr-name">Ground</div><div class="cr-power">PWR 3</div><div class="cr-label">beats</div><div class="cr-strong">🔥⚡</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">❄️</div><div class="cr-name">Ice</div><div class="cr-power">PWR 4</div><div class="cr-label">beats</div><div class="cr-strong">💧🌿</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">💧</div><div class="cr-name">Water</div><div class="cr-power">PWR 5</div><div class="cr-label">beats</div><div class="cr-strong">🔥🪨</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">🪨</div><div class="cr-name">Stone</div><div class="cr-power">PWR 6</div><div class="cr-label">beats</div><div class="cr-strong">🔥🌿</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">⚡</div><div class="cr-name">Elec.</div><div class="cr-power">PWR 7</div><div class="cr-label">beats</div><div class="cr-strong">💧💨</div></div>
+            <div class="htp-card-row"><div class="cr-emoji">🔥</div><div class="cr-name">Fire</div><div class="cr-power">PWR 8</div><div class="cr-label">beats</div><div class="cr-strong">🌿❄️</div></div>
+          </div>
+        </div>
+
+        <!-- TIPS -->
+        <div>
+          <div class="htp-section-title">Tips</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="htp-tip"><div class="htp-tip-icon">🎯</div><div class="htp-tip-text"><strong>Watch what the CPU plays first.</strong> When CPU goes first, you get to react — pick a card that counters their element for a guaranteed win!</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">⚖️</div><div class="htp-tip-text"><strong>Low-power cards can still win big.</strong> Plant (power 1) beating Water (power 5) earns you <strong>6 points</strong>. Similarly, Wind (power 2) beating Fire (power 8) earns you <strong>10 points</strong> — far more than winning any pure power battle could.</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">🏆</div><div class="htp-tip-text"><strong>The round winner goes first next round.</strong> Going first is a double-edged sword — you play blind, but you can also set a trap.</div></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px 0 12px;border-top:1px solid rgba(255,255,255,0.05);margin-top:8px;">
+          <span style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:3px;color:rgba(255,255,255,0.2);text-transform:uppercase;">Elemental Clash · v1.0.0</span>
+          <div style="font-family:'Raleway', sans-serif;font-size:0.6rem;letter-spacing:2px;color:rgba(255,255,255,0.2);margin-top:6px;">by Inon Avramashvili</div>
+        </div>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  // Close on backdrop click
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeHowToPlay(); });
+}
+
+function closeHowToPlay() {
+  const el = document.getElementById('htp-overlay');
+  if (el) el.remove();
+}
+
+// ===== MODES SCREEN =====
+function openModesScreen() {
+  playSound('btn'); haptic('light');
+  history.pushState({ screen: 'modes' }, '');
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('modes-screen').classList.remove('hidden');
+}
+function closeModesScreen() {
+  document.getElementById('modes-screen').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+}
+
+// ===== BEST OF 3 =====
+let match = null; // null when not in BO3 mode
+
+function startBo3() {
+  match = { userWins: 0, cpuWins: 0, game: 1 };
+  closeModesScreen();
+  updateMatchIndicator();
+  startGame();
+}
+
+function updateMatchIndicator() {
+  const indicator = document.getElementById('match-indicator');
+  const title = document.getElementById('top-bar-title');
+  if (!match) {
+    indicator.classList.add('hidden');
+    title.textContent = 'ELEMENTAL CLASH';
+    return;
+  }
+  indicator.classList.remove('hidden');
+  title.textContent = `Game ${match.game} of 3`;
+
+  // User dots
+  for (let i = 0; i < 2; i++) {
+    const dot = document.getElementById(`match-dot-user-${i}`);
+    dot.className = 'match-dot' + (i < match.userWins ? ' user-won' : '');
+  }
+  // CPU dots
+  for (let i = 0; i < 2; i++) {
+    const dot = document.getElementById(`match-dot-cpu-${i}`);
+    dot.className = 'match-dot' + (i < match.cpuWins ? ' cpu-won' : '');
+  }
+}
+
+function showBo3GameOver(userWon, tie) {
+  if (!tie) {
+    if (userWon) match.userWins++;
+    else match.cpuWins++;
+  }
+
+  // Check if match is decided
+  const matchWon  = match.userWins >= 2;
+  const matchLost = match.cpuWins >= 2;
+  const matchOver = matchWon || matchLost || match.game >= 3;
+
+  if (matchOver) {
+    showMatchResult(matchWon, matchLost);
+    return;
+  }
+
+  // Show inter-game result and continue
+  match.game++;
+  updateMatchIndicator();
+
+  const icon  = tie ? '⚖️' : userWon ? '🏆' : '💀';
+  const title = tie ? 'Draw' : userWon ? 'You won that one!' : 'CPU wins that one!';
+  const dots  = `
+    <div style="display:flex;gap:10px;justify-content:center;margin:8px 0">
+      <div style="text-align:center">
+        <div style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:2px;color:var(--text2);margin-bottom:6px">YOU</div>
+        <div style="display:flex;gap:5px">${[0,1].map(i => `<div style="width:12px;height:12px;border-radius:50%;background:${i < match.userWins ? '#80ff80' : 'rgba(255,255,255,0.1)'};border:1px solid ${i < match.userWins ? '#80ff80' : 'rgba(255,255,255,0.15)'}"></div>`).join('')}</div>
+      </div>
+      <div style="font-family:'Cinzel', serif;font-size:1rem;color:var(--text2);align-self:center">—</div>
+      <div style="text-align:center">
+        <div style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:2px;color:var(--text2);margin-bottom:6px">CPU</div>
+        <div style="display:flex;gap:5px">${[0,1].map(i => `<div style="width:12px;height:12px;border-radius:50%;background:${i < match.cpuWins ? '#ff8080' : 'rgba(255,255,255,0.1)'};border:1px solid ${i < match.cpuWins ? '#ff8080' : 'rgba(255,255,255,0.15)'}"></div>`).join('')}</div>
+      </div>
+    </div>`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <span class="modal-icon">${icon}</span>
+      <div class="modal-title">${title}</div>
+      <div class="modal-subtitle">Game ${match.game - 1} · Score: ${state.userScore} — ${state.cpuScore}</div>
+      ${dots}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();nextBo3Game()">Next Game →</button>
+        <button class="modal-btn modal-btn-secondary" onclick="openGameLog()">📜 Game Log</button>
+        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();abandonMatch()">✕ Abandon Match</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function showMatchResult(matchWon, matchLost) {
+  const tie = !matchWon && !matchLost;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <span class="modal-icon">${tie ? '⚖️' : matchWon ? '👑' : '💀'}</span>
+      <div class="modal-title">${tie ? 'Match Draw!' : matchWon ? 'Match Victory!' : 'Match Defeat!'}</div>
+      <div class="modal-subtitle">${tie ? 'An even contest' : matchWon ? 'You claimed the match' : 'The CPU claims the match'}</div>
+      <div class="modal-scores">
+        <div class="modal-score-item">
+          <div class="modal-score-name">You</div>
+          <div class="modal-score-val" style="color:${matchWon?'#80ff80':'var(--text)'}">${match.userWins}</div>
+        </div>
+        <div class="modal-score-item">
+          <div class="modal-score-name">CPU</div>
+          <div class="modal-score-val" style="color:${matchLost?'#ff8080':'var(--text)'}">${match.cpuWins}</div>
+        </div>
+      </div>
+      <div style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:2px;color:var(--text2);margin-top:-8px">GAMES WON</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();rematch()">⚔ Rematch</button>
+        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();goHome()">⌂ Home</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  match = null;
+  updateMatchIndicator();
+}
+
+function nextBo3Game() {
+  clearBattleSlots();
+  state = {
+    stack: [], userHand: [], cpuHand: [],
+    userScore: 0, cpuScore: 0, trash: [],
+    currentTurn: null, firstPlayer: null,
+    round: 1, phase: 'idle',
+    userPlayedCard: null, cpuPlayedCard: null,
+    drawsNeeded: [], gameLog: [],
+  };
+  startGame();
+}
+
+function rematch() {
+  match = { userWins: 0, cpuWins: 0, game: 1 };
+  updateMatchIndicator();
+  startGame();
+}
+
+function abandonMatch() {
+  document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+  match = null;
+  updateMatchIndicator();
+  goHome();
+}
+
+// ===== DRAFT MODE =====
+let draft = null;
+
+function startDraft() {
+  draft = { userHand: [], cpuHand: [] };
+  closeModesScreen();
+  const goesFirst = Math.random() < 0.5 ? 'user' : 'cpu';
+  showDraftCoinFlip(goesFirst);
+}
+
+function showDraftCoinFlip(goesFirst) {
+  const userWins = goesFirst === 'user';
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="coin-wrapper">
+        <div class="coin" style="animation: ${userWins ? 'coinFlipUser' : 'coinFlipCpu'} 1.6s cubic-bezier(0.4,0,0.2,1) forwards">
+          <div class="coin-face coin-front">🛡</div>
+          <div class="coin-face coin-back">⚔</div>
+        </div>
+      </div>
+      <div class="modal-title">Coin Flip!</div>
+      <div class="modal-subtitle coin-result-text" id="draft-flip-result">${userWins ? '🛡 You Pick First!' : '⚔ CPU Picks First!'}</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    const el = document.getElementById('draft-flip-result');
+    if (el) el.classList.add('visible');
+  }, 1700);
+  setTimeout(() => {
+    overlay.remove();
+    openDraftScreen(goesFirst);
+  }, 2800);
+}
+
+function openDraftScreen(firstPicker) {
+  // Build alternating pick order: 8 picks total
+  draft.pickOrder = [];
+  for (let i = 0; i < 8; i++) {
+    draft.pickOrder.push(i % 2 === 0 ? firstPicker : (firstPicker === 'user' ? 'cpu' : 'user'));
+  }
+  draft.pickIndex = 0;
+  draft.userHand  = [];
+  draft.cpuHand   = [];
+
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('draft-screen').classList.remove('hidden');
+  history.replaceState({ screen: 'draft' }, '');
+
+  // Build grid
+  const grid = document.getElementById('draft-grid');
+  grid.innerHTML = '';
+  document.getElementById('draft-cpu-picks').innerHTML = '';
+  document.getElementById('draft-user-picks').innerHTML = '';
+
+  CARDS.forEach(card => {
+    const wrap = document.createElement('div');
+    wrap.className = 'draft-card-wrap';
+    wrap.id = `dcard-${card.type}`;
+    const cardEl = createCardEl(card);
+    const overlay = document.createElement('div');
+    overlay.className = 'draft-picked-overlay';
+    wrap.appendChild(cardEl);
+    wrap.appendChild(overlay);
+    grid.appendChild(wrap);
+  });
+
+  processDraftTurn();
+}
+
+function processDraftTurn() {
+  if (draft.pickIndex >= 8) {
+    // All picked — launch game
+    document.getElementById('draft-status').textContent = 'Draft complete!';
+    document.getElementById('draft-status').className = 'draft-status';
+    setTimeout(() => launchDraftGame(), 1000);
+    return;
+  }
+
+  const picker = draft.pickOrder[draft.pickIndex];
+  const statusEl = document.getElementById('draft-status');
+
+  // Disable all cards first
+  CARDS.forEach(card => {
+    const el = document.getElementById(`dcard-${card.type}`);
+    if (el && !el.classList.contains('picked')) {
+      el.classList.remove('selectable');
+      el.onclick = null;
+    }
+  });
+
+  if (picker === 'user') {
+    statusEl.textContent = `Your pick — ${draft.userHand.length + 1} of 4`;
+    statusEl.className = 'draft-status your-turn';
+    CARDS.forEach(card => {
+      const el = document.getElementById(`dcard-${card.type}`);
+      if (el && !el.classList.contains('picked')) {
+        el.classList.add('selectable');
+        el.onclick = () => applyDraftPick('user', card);
+      }
+    });
+  } else {
+    statusEl.textContent = `CPU is picking... ${draft.cpuHand.length + 1} of 4`;
+    statusEl.className = 'draft-status cpu-turn';
+    setTimeout(() => cpuDraftPick(), 1200);
+  }
+}
+
+function cpuDraftPick() {
+  if (!draft) return;
+  const available = CARDS.filter(c =>
+    !draft.userHand.find(u => u.type === c.type) &&
+    !draft.cpuHand.find(u => u.type === c.type)
+  );
+  const userTypes = draft.userHand.map(c => c.type);
+  let best = null, bestScore = -Infinity;
+  available.forEach(card => {
+    let score = card.power;
+    card.strong.forEach(t => { if (userTypes.includes(t)) score += 20; });
+    const userCounters = draft.userHand.filter(uc => uc.strong.includes(card.type)).length;
+    score -= userCounters * 10;
+    if (score > bestScore) { bestScore = score; best = card; }
+  });
+  applyDraftPick('cpu', best || available[0]);
+}
+
+function applyDraftPick(who, card) {
+  if (!draft) return;
+  if (who === 'user') draft.userHand.push(card);
+  else draft.cpuHand.push(card);
+
+  if (who === 'user') { playSound('draft'); haptic('light'); }
+  const el = document.getElementById(`dcard-${card.type}`);
+  if (el) {
+    el.classList.remove('selectable');
+    el.onclick = null;
+    el.classList.add('picked', `picked-${who}`);
+    el.querySelector('.draft-picked-overlay').textContent = who === 'user' ? '🛡' : '⚔';
+  }
+
+  // Add chip and advance pick
+  setTimeout(() => {
+    const picksEl = document.getElementById(`draft-${who}-picks`);
+    const chip = document.createElement('div');
+    chip.className = `draft-pick-chip ${who}-chip`;
+    chip.innerHTML = card.emoji;
+    picksEl.appendChild(chip);
+
+    draft.pickIndex++;
+    processDraftTurn();
+  }, 420);
+}
+
+function launchDraftGame() {
+  if (!draft) return;
+  document.getElementById('draft-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  history.pushState({ screen: 'game' }, '');
+
+  // Shuffle each drafted hand, deal 2 into hand, rest become personal pile
+  const userDrafted = shuffle([...draft.userHand]);
+  const cpuDrafted  = shuffle([...draft.cpuHand]);
+
+  state.userHand       = [userDrafted.pop(), userDrafted.pop()];
+  state.cpuHand        = [cpuDrafted.pop(),  cpuDrafted.pop()];
+  state.userStack      = userDrafted; // personal pile (2 cards)
+  state.cpuStack       = cpuDrafted;  // personal pile (2 cards)
+  state.stack          = [];          // shared stack unused in draft
+  state.userScore      = 0;
+  state.cpuScore       = 0;
+  state.trash          = [];
+  state.round          = 1;
+  state.firstPlayer    = null;
+  state.userPlayedCard = null;
+  state.cpuPlayedCard  = null;
+  state.phase          = 'coin';
+  state.drawsNeeded    = [];
+  state.gameLog        = [];
+
+  clearBattleSlots();
+  document.getElementById('user-hand').innerHTML = '';
+  document.getElementById('cpu-hand').innerHTML  = '';
+  setTimeout(doCoinFlip, 400);
+}
+
+// ===== BACK BUTTON HANDLING =====
+history.replaceState({ screen: 'home' }, '');
+history.pushState({ screen: 'guard' }, '');
+
+window.addEventListener('popstate', (e) => {
+  // Always re-push the guard so the app never exits
+  history.pushState({ screen: 'guard' }, '');
+
+  // Close HTP overlay if open
+  const htp = document.getElementById('htp-overlay');
+  if (htp) { htp.remove(); return; }
+
+  // Close any config modals if open
+  const modals = document.querySelectorAll('.modal-overlay');
+  if (modals.length > 0) {
+    // Only close config modals (blitz/survival), not in-game modals
+    const config = document.getElementById('blitz-config-overlay') || document.getElementById('survival-config-overlay');
+    if (config) { config.remove(); return; }
+    // If game is active and a game modal is showing, go home
+    if (!document.getElementById('game-screen').classList.contains('hidden')) {
+      modals.forEach(el => el.remove());
+      goHome();
+      return;
+    }
+    return;
+  }
+
+  // Check which screen is visible and go back
+  if (!document.getElementById('game-screen').classList.contains('hidden')) {
+    goHome(); return;
+  }
+  if (!document.getElementById('draft-screen').classList.contains('hidden')) {
+    draft = null;
+    document.getElementById('draft-screen').classList.add('hidden');
+    document.getElementById('draft-grid').innerHTML = '';
+    document.getElementById('draft-cpu-picks').innerHTML = '';
+    document.getElementById('draft-user-picks').innerHTML = '';
+    document.getElementById('start-screen').classList.remove('hidden');
+    return;
+  }
+  if (!document.getElementById('modes-screen').classList.contains('hidden')) {
+    closeModesScreen(); return;
+  }
+  if (!document.getElementById('more-screen').classList.contains('hidden')) {
+    closeMoreMenu(); return;
+  }
+  if (!document.getElementById('settings-screen').classList.contains('hidden')) {
+    closeSettings(); return;
+  }
+});
+
+// ===== BLITZ MODE =====
+let blitz = null;         // null or { duration: 5 }
+let blitzTimerInterval = null;
+let blitzTimeLeft = 0;
+
+function openBlitzConfig() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'blitz-config-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="gap:18px;max-width:360px;width:90%;padding:40px 32px">
+      <span class="modal-icon">⏱️</span>
+      <div class="modal-title">Blitz</div>
+      <div class="modal-subtitle">Play your card before time runs out — or a random card is played for you!</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+        <div style="font-family:'Cinzel', serif;font-size:0.6rem;letter-spacing:3px;color:var(--text2);text-transform:uppercase">Seconds per turn</div>
+        <div style="display:flex;gap:8px">
+          <button class="survival-preset" onclick="setBlitzPreset(3, this)">3 sec</button>
+          <button class="survival-preset active" onclick="setBlitzPreset(5, this)">5 sec</button>
+          <button class="survival-preset" onclick="setBlitzPreset(10, this)">10 sec</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:16px">
+        <button class="modal-btn" onclick="startBlitz()">⚔ Begin Blitz</button>
+        <button class="modal-btn modal-btn-secondary" onclick="closeBlitzConfig()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeBlitzConfig(); });
+  window._blitzDuration = 5;
+}
+
+function setBlitzPreset(val, btn) {
+  window._blitzDuration = val;
+  document.querySelectorAll('#blitz-config-overlay .survival-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function closeBlitzConfig() {
+  const el = document.getElementById('blitz-config-overlay');
+  if (el) el.remove();
+}
+
+function startBlitz() {
+  blitz = { duration: window._blitzDuration || 5 };
+  closeBlitzConfig();
+  closeModesScreen();
+  startGame();
+}
+
+function startBlitzTimer() {
+  if (!blitz) return;
+  clearBlitzTimer();
+
+  blitzTimeLeft = blitz.duration;
+  const timerEl   = document.getElementById('blitz-timer');
+  const countEl   = document.getElementById('blitz-timer-count');
+  const fillEl    = document.getElementById('blitz-ring-fill');
+  const circumference = 100;
+
+  timerEl.classList.remove('hidden');
+  countEl.textContent = blitzTimeLeft;
+  countEl.classList.remove('urgent');
+  fillEl.classList.remove('urgent');
+
+  // Reset ring instantly, then animate drain over full duration
+  fillEl.style.transition = 'none';
+  fillEl.style.strokeDashoffset = 0;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fillEl.style.transition = `stroke-dashoffset ${blitz.duration}s linear, stroke 0.3s`;
+    fillEl.style.strokeDashoffset = circumference;
+  }));
+
+  // Interval only for countdown number and urgent state
+  blitzTimerInterval = setInterval(() => {
+    blitzTimeLeft--;
+    countEl.textContent = Math.max(0, blitzTimeLeft);
+
+    if (blitzTimeLeft <= 2) {
+      countEl.classList.add('urgent');
+      fillEl.classList.add('urgent');
+    }
+
+    if (blitzTimeLeft <= 0) {
+      clearBlitzTimer();
+      autoPlayBlitzCard();
+    }
+  }, 1000);
+}
+
+function clearBlitzTimer() {
+  if (blitzTimerInterval) {
+    clearInterval(blitzTimerInterval);
+    blitzTimerInterval = null;
+  }
+  const timerEl = document.getElementById('blitz-timer');
+  if (timerEl) timerEl.classList.add('hidden');
+}
+
+function autoPlayBlitzCard() {
+  if (state.currentTurn !== 'user') return;
+  if (state.phase !== 'play-first' && state.phase !== 'play-second') return;
+  const randomIndex = Math.floor(Math.random() * state.userHand.length);
+  userPlayCard(randomIndex);
+}
+
+// ===== SURVIVAL MODE =====
+let survival = null; // null when not in survival mode
+
+function openSurvivalConfig() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'survival-config-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="gap:18px;max-width:360px;width:90%;padding:40px 32px">
+      <span class="modal-icon">♾️</span>
+      <div class="modal-title">Survival</div>
+      <div class="modal-subtitle">First to reach the target score wins. The deck refills each time it runs out.</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+        <div style="font-family:'Cinzel', serif;font-size:0.6rem;letter-spacing:3px;color:var(--text2);text-transform:uppercase">Target Score</div>
+        <div style="display:flex;gap:8px">
+          <button class="survival-preset" onclick="setSurvivalPreset(30, this)">30</button>
+          <button class="survival-preset active" onclick="setSurvivalPreset(50, this)">50</button>
+          <button class="survival-preset" onclick="setSurvivalPreset(100, this)">100</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:2px;color:var(--text2)">Custom:</span>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <input id="survival-custom-input" type="number" min="20" max="999" placeholder="20+"
+              style="width:90px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'Cinzel', serif;font-size:1rem;text-align:center;"
+              oninput="onSurvivalCustomInput(this)">
+            <span id="survival-input-error" style="font-family:'Cinzel', serif;font-size:0.48rem;letter-spacing:1px;color:#ff8080;display:none;">Min. 20</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:16px">
+        <button class="modal-btn" onclick="startSurvival()">⚔ Begin Survival</button>
+        <button class="modal-btn modal-btn-secondary" onclick="closeSurvivalConfig()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeSurvivalConfig(); });
+  // Default to 50
+  window._survivalTarget = 50;
+}
+
+function setSurvivalPreset(val, btn) {
+  window._survivalTarget = val;
+  document.querySelectorAll('.survival-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('survival-custom-input').value = '';
+}
+
+function onSurvivalCustomInput(input) {
+  const val = parseInt(input.value);
+  const error = document.getElementById('survival-input-error');
+  const btn = document.querySelector('#survival-config-overlay .modal-btn');
+  const invalid = input.value !== '' && (isNaN(val) || val < 20);
+
+  input.style.borderColor = invalid ? 'rgba(255,80,80,0.5)' : 'rgba(255,255,255,0.1)';
+  error.style.display = invalid ? 'block' : 'none';
+  btn.disabled = invalid;
+  btn.style.opacity = invalid ? '0.4' : '1';
+
+  if (!invalid && input.value !== '') {
+    window._survivalTarget = val;
+    document.querySelectorAll('.survival-preset').forEach(b => b.classList.remove('active'));
+  }
+}
+
+function closeSurvivalConfig() {
+  const el = document.getElementById('survival-config-overlay');
+  if (el) el.remove();
+}
+
+function startSurvival() {
+  const target = window._survivalTarget || 50;
+  survival = { target };
+  closeSurvivalConfig();
+  closeModesScreen();
+  startGame();
+}
+
+function updateSurvivalProgress() {
+  if (!survival) return;
+  const progress = document.getElementById('survival-progress');
+  const userFill  = document.getElementById('survival-user-fill');
+  const cpuFill   = document.getElementById('survival-cpu-fill');
+  const targetLbl = document.getElementById('survival-target-label');
+  const userTarget = document.getElementById('user-score-target');
+  const cpuTarget  = document.getElementById('cpu-score-target');
+
+  progress.classList.remove('hidden');
+  targetLbl.textContent = survival.target;
+
+  const userPct = Math.min(100, (state.userScore / survival.target) * 100);
+  const cpuPct  = Math.min(100, (state.cpuScore  / survival.target) * 100);
+  userFill.style.width = userPct + '%';
+  cpuFill.style.width  = cpuPct  + '%';
+
+  // Score target labels
+  userTarget.textContent = `/ ${survival.target}`;
+  cpuTarget.textContent  = `/ ${survival.target}`;
+  userTarget.classList.remove('hidden');
+  cpuTarget.classList.remove('hidden');
+}
+
+function checkSurvivalWin() {
+  if (!survival) return false;
+  const userHit = state.userScore >= survival.target;
+  const cpuHit  = state.cpuScore  >= survival.target;
+  if (userHit || cpuHit) {
+    renderHands();
+    setTimeout(() => { if (state.phase !== 'abandoned') showGameOver(); }, 500);
+    return true;
+  }
+  return false;
+}
+
+function refillDeckIfNeeded() {
+  // No-op: refill now happens seamlessly in drawCardFor when last card is drawn
+}
+
+
+function openMoreMenu() {
+  playSound('btn'); haptic('light');
+  history.pushState({ screen: 'more' }, '');
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('more-screen').classList.remove('hidden');
+}
+
+function closeMoreMenu() {
+  document.getElementById('more-screen').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+}
+
+// ===== STATISTICS =====
+const STATS_KEY = 'elemental_clash_stats';
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    return raw ? JSON.parse(raw) : defaultStats();
+  } catch { return defaultStats(); }
+}
+
+function defaultStats() {
+  return {
+    gamesPlayed: 0,
+    gamesWon: 0,
+    gamesLost: 0,
+    gamesTied: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    totalPointsScored: 0,
+    biggestRoundScore: 0,
+    biggestGameScore: 0,
+    cardPlayCount: {},
+    cardWinCount: {},
+    upsets: 0,
+    perfectGames: 0,
+    coinFlipsWon: 0,
+    coinFlipsTotal: 0,
+    coinFlipStreak: 0,
+    bestCoinFlipStreak: 0,
+    davidWins: 0,
+    comebacks: 0,
+    totalPerfectReads: 0,
+    unlockedAchievements: [],
+  };
+}
+
+function saveStats(stats) {
+  try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch {}
+}
+
+function recordGameStats(userWon, tie) {
+  const stats = loadStats();
+  stats.gamesPlayed++;
+
+  if (userWon) {
+    stats.gamesWon++;
+    stats.currentStreak++;
+    stats.bestStreak = Math.max(stats.bestStreak, stats.currentStreak);
+  } else if (tie) {
+    stats.gamesTied++;
+    stats.currentStreak = 0;
+  } else {
+    stats.gamesLost++;
+    stats.currentStreak = 0;
+  }
+
+  stats.totalPointsScored += state.userScore;
+  stats.biggestGameScore = Math.max(stats.biggestGameScore, state.userScore);
+
+  // Perfect game: user won every round
+  const roundsWon = state.gameLog.filter(r => r.winner === 'user').length;
+  const roundsLost = state.gameLog.filter(r => r.winner === 'cpu').length;
+  if (userWon && roundsLost === 0) stats.perfectGames++;
+
+  // Per-round stats
+  state.gameLog.forEach(entry => {
+    const t = entry.userCard.type;
+    stats.cardPlayCount[t] = (stats.cardPlayCount[t] || 0) + 1;
+    if (entry.winner === 'user') {
+      stats.cardWinCount[t] = (stats.cardWinCount[t] || 0) + 1;
+      stats.biggestRoundScore = Math.max(stats.biggestRoundScore, entry.userPts);
+      // Upset: user won without type advantage and had lower power
+      if (!entry.userCard.strong.includes(entry.cpuCard.type) &&
+          entry.userCard.power < entry.cpuCard.power) {
+        stats.upsets++;
+      }
+    }
+  });
+
+  saveStats(stats);
+  return stats;
+}
+
+function recordCoinFlip(userWon) {
+  const stats = loadStats();
+  stats.coinFlipsTotal++;
+  if (userWon) {
+    stats.coinFlipsWon++;
+    stats.coinFlipStreak = (stats.coinFlipStreak || 0) + 1;
+    stats.bestCoinFlipStreak = Math.max(stats.bestCoinFlipStreak || 0, stats.coinFlipStreak);
+  } else {
+    stats.coinFlipStreak = 0;
+  }
+  saveStats(stats);
+}
+
+// ===== ACHIEVEMENTS =====
+const ACHIEVEMENTS = [
+  {
+    id: 'flawless',
+    icon: '🏆',
+    name: 'Flawless',
+    desc: 'Win games without losing a single round',
+    levels: [1, 3, 7, 15, 25],
+    stat: stats => stats.perfectGames || 0,
+  },
+  {
+    id: 'upset_king',
+    icon: '⚡',
+    name: 'Upset King',
+    desc: 'Win rounds with a lower power card (no type advantage)',
+    levels: [5, 15, 30, 50, 75],
+    stat: stats => stats.upsets || 0,
+  },
+  {
+    id: 'david_goliath',
+    icon: '🌿',
+    name: 'David vs Goliath',
+    desc: 'Win games where your total card power was less than the CPU\'s',
+    levels: [1, 3, 7, 15, 25],
+    stat: stats => stats.davidWins || 0,
+  },
+  {
+    id: 'dominant',
+    icon: '🔥',
+    name: 'Dominant',
+    desc: 'Win streak — how many in a row can you get?',
+    levels: [3, 5, 7, 10, 15],
+    stat: stats => stats.bestStreak || 0,
+  },
+  {
+    id: 'perfect_read',
+    icon: '🎯',
+    name: 'Perfect Read',
+    desc: 'Counter the CPU\'s card by type across all games',
+    levels: [3, 10, 25, 50, 100],
+    stat: stats => stats.totalPerfectReads || 0,
+  },
+  {
+    id: 'comeback',
+    icon: '💀',
+    name: 'Comeback',
+    desc: 'Win games after trailing by 10 or more points',
+    levels: [1, 3, 7, 15, 25],
+    stat: stats => stats.comebacks || 0,
+  },
+  {
+    id: 'lucky',
+    icon: '🪙',
+    name: 'Lucky',
+    desc: 'Win coin flips in a row',
+    levels: [3, 5, 7],
+    stat: stats => stats.bestCoinFlipStreak || 0,
+  },
+];
+
+// Get current level (0 = not started, 1-5 = level)
+function getAchievementLevel(a, stats) {
+  const value = a.stat(stats);
+  let level = 0;
+  for (let i = 0; i < a.levels.length; i++) {
+    if (value >= a.levels[i]) level = i + 1;
+  }
+  return level;
+}
+
+function checkAchievements(userWon, tie) {
+  const stats = loadStats();
+  const prevLevels = {};
+  ACHIEVEMENTS.forEach(a => { prevLevels[a.id] = getAchievementLevel(a, stats); });
+
+  // Update cumulative stats needed for achievements
+  if (userWon) {
+    // David vs Goliath
+    const userTotalPower = state.gameLog.reduce((sum, r) => sum + r.userCard.power, 0);
+    const cpuTotalPower  = state.gameLog.reduce((sum, r) => sum + r.cpuCard.power, 0);
+    if (userTotalPower < cpuTotalPower) stats.davidWins = (stats.davidWins || 0) + 1;
+
+    // Comeback
+    let maxDeficit = 0, userRunning = 0, cpuRunning = 0;
+    state.gameLog.forEach(r => {
+      userRunning += r.userPts; cpuRunning += r.cpuPts;
+      if (cpuRunning - userRunning > maxDeficit) maxDeficit = cpuRunning - userRunning;
+    });
+    if (maxDeficit >= 10) stats.comebacks = (stats.comebacks || 0) + 1;
+
+    // Perfect Read (accumulate across games)
+    const readsThisGame = state.gameLog.filter(r =>
+      r.winner === 'user' && r.userCard.strong.includes(r.cpuCard.type)
+    ).length;
+    stats.totalPerfectReads = (stats.totalPerfectReads || 0) + readsThisGame;
+  }
+
+  saveStats(stats);
+
+  // Check which levels newly unlocked
+  const newlyUnlocked = []; // { id, level }
+  ACHIEVEMENTS.forEach(a => {
+    const newLevel = getAchievementLevel(a, stats);
+    if (newLevel > prevLevels[a.id]) {
+      for (let l = prevLevels[a.id] + 1; l <= newLevel; l++) {
+        newlyUnlocked.push({ id: a.id, level: l });
+      }
+    }
+  });
+
+  if (newlyUnlocked.length > 0) {
+    newlyUnlocked.forEach(({ id, level }, i) => {
+      setTimeout(() => showAchievementToast(id, level), i * 3800);
+    });
+  }
+}
+
+function showToast(icon, label, message, color = 'rgba(201,168,76,0.4)') {
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.style.borderColor = color;
+  toast.innerHTML = `
+    <div class="achievement-toast-icon">${icon}</div>
+    <div class="achievement-toast-text">
+      <div class="achievement-toast-label">${label}</div>
+      <div class="achievement-toast-name">${message}</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+  });
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+}
+
+function showAchievementToast(id, level) {
+  const a = ACHIEVEMENTS.find(a => a.id === id);
+  if (!a) return;
+  const maxLevel = a.levels.length;
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `
+    <div class="achievement-toast-icon">${a.icon}</div>
+    <div class="achievement-toast-text">
+      <div class="achievement-toast-label">Achievement Unlocked</div>
+      <div class="achievement-toast-name">${a.name}</div>
+      <div class="achievement-toast-level">${'★'.repeat(level)}${'☆'.repeat(maxLevel - level)} Level ${level}</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  // Force reflow before adding visible to ensure transition fires cleanly
+  toast.getBoundingClientRect();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+  });
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 500);
+  }, 3200);
+}
+
+function openAchievements() {
+  const stats = loadStats();
+
+  const totalLevels = ACHIEVEMENTS.reduce((sum, a) => sum + a.levels.length, 0);
+  const earnedLevels = ACHIEVEMENTS.reduce((sum, a) => sum + getAchievementLevel(a, stats), 0);
+
+  const rows = ACHIEVEMENTS.map(a => {
+    const currentLevel = getAchievementLevel(a, stats);
+    const maxLevel = a.levels.length;
+    const isMaxed = currentLevel >= maxLevel;
+    const currentValue = a.stat(stats);
+
+    // Stars row
+    const stars = Array.from({length: maxLevel}, (_, i) =>
+      `<span class="ach-star ${i < currentLevel ? 'earned' : ''}">${i < currentLevel ? '★' : '☆'}</span>`
+    ).join('');
+
+    // Progress to next level
+    let progressBar = '';
+    if (!isMaxed) {
+      const nextThreshold = a.levels[currentLevel];
+      const pct = Math.min(100, Math.round((currentValue / nextThreshold) * 100));
+      progressBar = `
+        <div class="achievement-progress">
+          <div class="achievement-progress-bar">
+            <div class="achievement-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="achievement-progress-label">${currentValue} / ${nextThreshold}</span>
+        </div>`;
+    }
+
+    const levelLabel = currentLevel === 0
+      ? '<span class="ach-level-tag locked-tag">Locked</span>'
+      : isMaxed
+        ? '<span class="ach-level-tag maxed-tag">Maxed</span>'
+        : `<span class="ach-level-tag">Level ${currentLevel}</span>`;
+
+    return `
+      <div class="achievement-row ${currentLevel > 0 ? 'unlocked' : 'locked'}">
+        <div class="achievement-row-icon">${currentLevel > 0 ? a.icon : '🔒'}</div>
+        <div class="achievement-row-text">
+          <div class="achievement-row-header">
+            <div class="achievement-row-name">${a.name}</div>
+            ${levelLabel}
+          </div>
+          <div class="achievement-row-desc">${a.desc}</div>
+          <div class="ach-stars">${stars}</div>
+          ${progressBar}
+        </div>
+      </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'htp-overlay';
+  overlay.id = 'achievements-overlay';
+  overlay.innerHTML = `
+    <div class="htp-modal" style="max-width:480px">
+      <div class="htp-header">
+        <div class="htp-title">🏆 Achievements</div>
+        <button class="htp-close" onclick="closeAchievements()">✕</button>
+      </div>
+      <div class="htp-body">
+        <div style="text-align:center;margin-bottom:16px">
+          <span style="font-family:'Cinzel Decorative', serif;font-size:1.4rem;color:var(--gold);filter:drop-shadow(0 0 10px rgba(201,168,76,0.5))">${earnedLevels}</span>
+          <span style="font-family:'Cinzel', serif;font-size:0.6rem;letter-spacing:2px;color:var(--text2)"> / ${totalLevels} LEVELS</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${rows}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeAchievements(); });
+}
+
+function closeAchievements() {
+  const el = document.getElementById('achievements-overlay');
+  if (el) el.remove();
+}
+
+function openStats() {
+  const stats = loadStats();
+
+  // Favorite card (most played)
+  let favCard = '—';
+  let favCount = 0;
+  Object.entries(stats.cardPlayCount).forEach(([type, count]) => {
+    if (count > favCount) { favCount = count; favCard = type; }
+  });
+  const favCardData = CARDS.find(c => c.type === favCard);
+  const favDisplay = favCardData ? `${favCardData.emoji} ${favCardData.label}` : '—';
+
+  // Most wins card
+  let mostWinsCard = '—';
+  let mostWins = 0;
+  Object.entries(stats.cardWinCount).forEach(([type, wins]) => {
+    if (wins > mostWins) { mostWins = wins; mostWinsCard = type; }
+  });
+  const mostWinsData = CARDS.find(c => c.type === mostWinsCard);
+  const mostWinsDisplay = mostWinsData ? `${mostWinsData.emoji} ${mostWinsData.label}` : '—';
+
+  const winRate = stats.gamesPlayed > 0
+    ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) + '%'
+    : '—';
+
+  const coinRate = stats.coinFlipsTotal > 0
+    ? Math.round((stats.coinFlipsWon / stats.coinFlipsTotal) * 100) + '%'
+    : '—';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'htp-overlay';
+  overlay.id = 'stats-overlay';
+  overlay.innerHTML = `
+    <div class="htp-modal" style="max-width:480px">
+      <div class="htp-header">
+        <div class="htp-title">📊 Statistics</div>
+        <button class="htp-close" onclick="closeStats()">✕</button>
+      </div>
+      <div class="htp-body">
+
+        <div>
+          <div class="htp-section-title">Games</div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="stat-val">${stats.gamesPlayed}</div><div class="stat-lbl">Played</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:#80ff80">${stats.gamesWon}</div><div class="stat-lbl">Won</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:#ff8080">${stats.gamesLost}</div><div class="stat-lbl">Lost</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:#c0c0c0">${stats.gamesTied}</div><div class="stat-lbl">Tied</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="htp-section-title">Performance</div>
+          <div class="stats-grid stats-grid-3">
+            <div class="stat-box"><div class="stat-val">${winRate}</div><div class="stat-lbl">Win Rate</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:var(--gold)">${stats.currentStreak}</div><div class="stat-lbl">Streak</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:var(--gold)">${stats.bestStreak}</div><div class="stat-lbl">Best Streak</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="htp-section-title">Scoring</div>
+          <div class="stats-grid stats-grid-3">
+            <div class="stat-box"><div class="stat-val">${stats.totalPointsScored}</div><div class="stat-lbl">Total Points</div></div>
+            <div class="stat-box"><div class="stat-val">${stats.biggestGameScore}</div><div class="stat-lbl">Best Game</div></div>
+            <div class="stat-box"><div class="stat-val">${stats.biggestRoundScore}</div><div class="stat-lbl">Best Round</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="htp-section-title">Cards</div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="stat-val">${favDisplay.split(' ')[0]}</div><div class="stat-val" style="font-size:0.8rem;margin-top:4px">${favDisplay.split(' ').slice(1).join(' ')}</div><div class="stat-lbl">Most Played</div></div>
+            <div class="stat-box"><div class="stat-val">${mostWinsDisplay.split(' ')[0]}</div><div class="stat-val" style="font-size:0.8rem;margin-top:4px">${mostWinsDisplay.split(' ').slice(1).join(' ')}</div><div class="stat-lbl">Most Wins</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="htp-section-title">Trivia</div>
+          <div class="stats-grid stats-grid-3">
+            <div class="stat-box"><div class="stat-val">${stats.upsets}</div><div class="stat-lbl">Upsets Won</div></div>
+            <div class="stat-box"><div class="stat-val">${stats.perfectGames}</div><div class="stat-lbl">Perfect Games</div></div>
+            <div class="stat-box"><div class="stat-val">${coinRate}</div><div class="stat-lbl">Coin Flip Luck</div></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:4px">
+          <button onclick="showResetConfirm()" style="font-family:'Cinzel', serif;font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;background:transparent;border:1px solid rgba(255,80,80,0.2);color:rgba(255,80,80,0.4);padding:6px 16px;border-radius:3px;cursor:pointer;">Reset Stats</button>
+        </div>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeStats(); });
+}
+
+function closeStats() {
+  const el = document.getElementById('stats-overlay');
+  if (el) el.remove();
+}
+
+function showResetConfirm() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'reset-confirm-overlay';
+  overlay.style.zIndex = '3000';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:300px;gap:16px;">
+      <span class="modal-icon">📊</span>
+      <div class="modal-title" style="font-size:1rem">Reset Stats?</div>
+      <div class="modal-subtitle">Game stats will be cleared. Your achievements and progress will be kept.</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
+        <button class="modal-btn" style="background:linear-gradient(135deg,#7a1a1a,#a02020);width:100%;" onclick="confirmResetStats()">Yes, Reset</button>
+        <button class="modal-btn modal-btn-secondary" style="width:100%;" onclick="cancelResetStats()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cancelResetStats(); });
+}
+
+function cancelResetStats() {
+  const el = document.getElementById('reset-confirm-overlay');
+  if (el) el.remove();
+}
+
+function confirmResetStats() {
+  const stats = loadStats();
+
+  // Preserve achievement progress and levels
+  const preserved = {
+    unlockedAchievements: stats.unlockedAchievements || [],
+    upsets:               stats.upsets || 0,
+    perfectGames:         stats.perfectGames || 0,
+    davidWins:            stats.davidWins || 0,
+    comebacks:            stats.comebacks || 0,
+    totalPerfectReads:    stats.totalPerfectReads || 0,
+    bestCoinFlipStreak:   stats.bestCoinFlipStreak || 0,
+    bestStreak:           stats.bestStreak || 0,
+  };
+
+  // Reset to default then re-apply preserved fields
+  const fresh = defaultStats();
+  Object.assign(fresh, preserved);
+  saveStats(fresh);
+
+  cancelResetStats();
+  closeStats();
+  openStats();
+  setTimeout(() => showToast('📊', 'Stats Reset', 'Game stats cleared'), 300);
+}
+
+// ===== MENU =====
+function toggleMenu() {
+  const menu = document.getElementById('game-menu');
+  menu.classList.toggle('open');
+  // Close when clicking outside
+  if (menu.classList.contains('open')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeMenuOutside, { once: true });
+    }, 0);
+  }
+}
+function closeMenuOutside(e) {
+  const menu = document.getElementById('game-menu');
+  if (menu && !menu.contains(e.target)) closeMenu();
+}
+function closeMenu() {
+  const menu = document.getElementById('game-menu');
+  if (menu) menu.classList.remove('open');
+}
+
+// ===== GAME LOG =====
+function openGameLog() {
+  const overlay = document.createElement('div');
+  overlay.className = 'log-overlay';
+  overlay.id = 'log-overlay';
+
+  const entries = state.gameLog.length === 0
+    ? `<div class="log-empty">No rounds played yet.</div>`
+    : [...state.gameLog].reverse().map(entry => {
+        const resultClass = entry.winner === 'user' ? 'you-win' : entry.winner === 'cpu' ? 'cpu-win' : 'tie';
+        const resultLabel = entry.winner === 'user' ? '✦ You Won' : entry.winner === 'cpu' ? '✦ CPU Won' : '✦ Tie';
+        const userWon = entry.winner === 'user';
+        const cpuWon  = entry.winner === 'cpu';
+        return `
+          <div class="log-entry">
+            <div class="log-entry-header">
+              <span class="log-round-label">Round ${entry.round}</span>
+              <span class="log-result-badge ${resultClass}">${resultLabel}</span>
+            </div>
+            <div class="log-cards-row">
+              <div class="log-card ${userWon ? 'winner-card' : cpuWon ? 'loser-card' : ''}">
+                <span class="log-card-emoji">${entry.userCard.emoji}</span>
+                <div class="log-card-info">
+                  <span class="log-card-name">You · ${entry.userCard.label}</span>
+                  ${entry.userPts ? `<span class="log-card-pts">+${entry.userPts} pts</span>` : ''}
+                </div>
+              </div>
+              <span class="log-vs">vs</span>
+              <div class="log-card ${cpuWon ? 'winner-card' : userWon ? 'loser-card' : ''}">
+                <span class="log-card-emoji">${entry.cpuCard.emoji}</span>
+                <div class="log-card-info">
+                  <span class="log-card-name">CPU · ${entry.cpuCard.label}</span>
+                  ${entry.cpuPts ? `<span class="log-card-pts">+${entry.cpuPts} pts</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="log-reason">${entry.reason}</div>
+          </div>`;
+      }).join('');
+
+  overlay.innerHTML = `
+    <div class="log-modal">
+      <div class="log-header">
+        <div class="log-title">📜 Game Log</div>
+        <button class="log-close" onclick="closeGameLog()">✕</button>
+      </div>
+      <div class="log-body">${entries}</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeGameLog(); });
+}
+
+function closeGameLog() {
+  const el = document.getElementById('log-overlay');
+  if (el) el.remove();
+}
+
+// ===== INIT =====
+// Ripple effect on tap
+document.addEventListener('pointerdown', e => {
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  ripple.style.left = (e.clientX - 3) + 'px';
+  ripple.style.top  = (e.clientY - 3) + 'px';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 500);
+});
+
+// ===== TUTORIAL =====
+const TUTORIAL_KEY = 'ec_tutorial_done';
+
+// Scripted tutorial cards
+const TUT_ROUNDS = [
+  {
+    user: 'water',       // PWR 5
+    cpu:  'fire',        // PWR 8
+    firstPlayer: 'user',
+  },
+  {
+    user: 'electricity', // PWR 7
+    cpu:  'ground',      // PWR 3
+    firstPlayer: 'user',
+  },
+  {
+    user: 'stone',       // PWR 6
+    cpu:  'wind',        // PWR 2
+    firstPlayer: 'user', // user always goes first in tutorial
+  },
+];
+
+let tutorial = null; // active tutorial state
+
+function isTutorialDone() {
+  try { return !!localStorage.getItem(TUTORIAL_KEY); } catch(e) { return false; }
+}
+
+function markTutorialDone() {
+  try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch(e) {}
+}
+
+function startTutorial() {
+  tutorial = { round: 0, active: true };
+  // Override startGame to use scripted deck
+  startTutorialGame();
+}
+
+function startTutorialGame() {
+  playSound('btn'); haptic('medium');
+  history.pushState({ screen: 'game' }, '');
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+
+  // Build a scripted stack: for each round, put cpu card then user card (they get popped)
+  // We'll manage hands manually round by round instead
+  state.userHand = [];
+  state.cpuHand  = [];
+  state.stack    = [];
+  state.userScore = 0;
+  state.cpuScore  = 0;
+  state.trash     = [];
+  state.round     = 1;
+  state.firstPlayer = 'user';
+  state.userPlayedCard = null;
+  state.cpuPlayedCard  = null;
+  state.phase = 'coin';
+
+  clearBattleSlots();
+  document.getElementById('user-hand').innerHTML = '';
+  document.getElementById('cpu-hand').innerHTML  = '';
+
+  // Skip coin flip — user always goes first in tutorial
+  // Show a brief welcome tooltip then deal cards
+  setTimeout(() => showTutorialWelcome(), 400);
+}
+
+function showTutorialWelcome() {
+  const overlay = document.createElement('div');
+  overlay.id = 'tut-welcome';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:360px;width:90%;padding:40px 32px">
+      <span class="modal-icon">⚔️</span>
+      <div class="modal-title">Tutorial</div>
+      <div class="modal-subtitle" style="margin-bottom:20px">3 rounds · Learn by playing</div>
+      <div style="font-size:0.82rem;color:var(--text2);line-height:1.7;margin-bottom:24px;text-align:left">
+        You'll play <strong style="color:var(--text)">3 scripted rounds</strong> designed to teach you the core mechanics.<br><br>
+        Each round will pause to explain what happened and how points are calculated.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+        <button class="modal-btn" onclick="document.getElementById('tut-welcome').remove();tutDealRound()">Let's Go →</button>
+        <button class="modal-btn modal-btn-secondary" onclick="skipTutorial()">Skip Tutorial</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function tutDealRound() {
+  if (!tutorial || !tutorial.active) return;
+  const roundIdx = state.round - 1;
+  if (roundIdx >= TUT_ROUNDS.length) return;
+
+  const script = TUT_ROUNDS[roundIdx];
+  const userCard = CARDS.find(c => c.type === script.user);
+  const cpuCard  = CARDS.find(c => c.type === script.cpu);
+
+  state.userHand    = [userCard];
+  state.cpuHand     = [cpuCard];
+  state.firstPlayer = 'user';
+  state.userPlayedCard = null;
+  state.cpuPlayedCard  = null;
+  state.phase = 'play-first';
+  state.currentTurn = 'user';
+
+  // Update stack count display to 0 (no pile in tutorial)
+  state.stack = [];
+
+  renderHands();
+  updateTurnIndicators();
+
+  // Show "choose your card" hint after a short delay
+  setTimeout(() => showTutChooseCard(roundIdx), 600);
+}
+
+function showTutChooseCard(roundIdx) {
+  if (!tutorial || !tutorial.active) return;
+
+  const titles = ['Round 1 of 3', 'Round 2 of 3', 'Round 3 of 3'];
+  const intros = [
+    'Your <strong>💧 Water</strong> card faces the CPU\'s hidden card. Tap your card to play it.',
+    'A new round — the CPU has a new card. Tap your card to play it.',
+    'Final round! Tap your card to play it.',
+  ];
+
+  const ol = document.createElement('div');
+  ol.className = 'tut-overlay';
+  ol.id = 'tut-hint-choose';
+  ol.innerHTML = `
+    <div class="tut-backdrop"></div>
+    <div class="tut-box" id="tut-box-choose">
+      <div class="tut-step">${titles[roundIdx]}</div>
+      <div class="tut-title">Your Turn</div>
+      <div class="tut-body">${intros[roundIdx]}</div>
+      <div class="tut-actions">
+        <button class="tut-skip" onclick="skipTutorial()">Skip tutorial</button>
+      </div>
+      <div class="tut-arrow down" id="tut-arrow-choose"></div>
+    </div>
+  `;
+  document.body.appendChild(ol);
+
+  // Position box above the hand with arrow pointing down at it
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const box = document.getElementById('tut-box-choose');
+      const handEl = document.getElementById('user-hand');
+      if (!box || !handEl) return;
+
+      const rect = handEl.getBoundingClientRect();
+      const bw = box.offsetWidth;
+      const bh = box.offsetHeight;
+
+      // Center box horizontally over hand, sit above it
+      const left = Math.max(8, Math.min(
+        rect.left + rect.width / 2 - bw / 2,
+        window.innerWidth - bw - 8
+      ));
+      const top = rect.top - bh - 24;
+
+      box.style.left = left + 'px';
+      box.style.top  = Math.max(8, top) + 'px';
+
+      // Position arrow to point at center of hand
+      const arrow = document.getElementById('tut-arrow-choose');
+      if (arrow) {
+        const arrowLeft = (rect.left + rect.width / 2) - left - 6;
+        arrow.style.left = Math.max(12, Math.min(arrowLeft, bw - 24)) + 'px';
+        arrow.style.marginLeft = '0';
+      }
+    });
+  });
+
+  // Highlight user hand
+  addTutHighlight('user-hand', 'tut-hl-hand');
+}
+
+function removeTutHint(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  removeTutHighlight('tut-hl-hand');
+}
+
+function addTutHighlight(targetId, hlId) {
+  removeTutHighlight(hlId);
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  const r = target.getBoundingClientRect();
+  const hl = document.createElement('div');
+  hl.className = 'tut-highlight-pulse';
+  hl.id = hlId;
+  hl.style.top    = (r.top  - 6 + window.scrollY) + 'px';
+  hl.style.left   = (r.left - 6 + window.scrollX) + 'px';
+  hl.style.width  = (r.width  + 12) + 'px';
+  hl.style.height = (r.height + 12) + 'px';
+  document.body.appendChild(hl);
+}
+
+function removeTutHighlight(hlId) {
+  const el = document.getElementById(hlId);
+  if (el) el.remove();
+}
+
+// Called from resolveRound when tutorial is active
+function showTutRoundExplainer(uCard, cCard, winner, userPts, cpuPts) {
+  if (!tutorial || !tutorial.active) return false;
+
+  const roundIdx = state.round - 1; // still pre-increment at this point
+  const uStrong = uCard.strong.includes(cCard.type);
+  const cStrong = cCard.strong.includes(uCard.type);
+  const typeAdvantage = (uStrong && !cStrong) || (cStrong && !uStrong);
+
+  let title, body, calc;
+
+  if (roundIdx === 0) {
+    // Round 1: user wins via type advantage despite lower power
+    title = 'Type Advantage!';
+    body  = `<strong>${uCard.emoji} ${uCard.label}</strong> (PWR ${uCard.power}) beat <strong>${cCard.emoji} ${cCard.label}</strong> (PWR ${cCard.power}) — even though ${cCard.label} had higher power!<br><br>When your card has a <strong>type advantage</strong>, it always wins the round.`;
+    calc  = `<span class="pts-user">✦ You earn both powers combined:<br>${uCard.power} + ${cCard.power} = <strong>${userPts} pts</strong></span>`;
+  } else if (roundIdx === 1) {
+    // Round 2: cpu wins via type advantage despite lower power
+    title = 'Type Advantage — CPU!';
+    body  = `Your <strong>${uCard.emoji} ${uCard.label}</strong> (PWR ${uCard.power}) lost to <strong>${cCard.emoji} ${cCard.label}</strong> (PWR ${cCard.power}) — even though you had higher power!<br><br>Type advantage works both ways. Always watch for counters.`;
+    calc  = `<span class="pts-cpu">✦ CPU earns both powers combined:<br>${uCard.power} + ${cCard.power} = <strong>${cpuPts} pts</strong></span>`;
+  } else if (roundIdx === 2) {
+    // Round 3: no type advantage, higher power wins
+    title = 'Power Decides!';
+    body  = `Neither <strong>${uCard.emoji} ${uCard.label}</strong> nor <strong>${cCard.emoji} ${cCard.label}</strong> had a type advantage.<br><br>When there's no type advantage, the <strong>higher power card wins</strong> — but earns only its own power value.`;
+    calc  = `<span class="pts-user">✦ You earn your card's power only:<br><strong>${userPts} pts</strong></span>`;
+  }
+
+  // Pause before showing explainer
+  setTimeout(() => {
+    const isLast = roundIdx === 2;
+
+    const ol = document.createElement('div');
+    ol.className = 'tut-overlay tut-overlay-centered';
+    ol.id = 'tut-explainer';
+    ol.innerHTML = `
+      <div class="tut-backdrop tut-backdrop-block"></div>
+      <div class="tut-box" id="tut-box-exp">
+        <div class="tut-step">Round ${roundIdx + 1} Result</div>
+        <div class="tut-title">${title}</div>
+        <div class="tut-body">${body}</div>
+        <div class="tut-calc">${calc}</div>
+        <div class="tut-actions">
+          <button class="tut-skip" onclick="skipTutorial()">Skip tutorial</button>
+          <button class="tut-next" onclick="dismissTutExplainer(${isLast})">${isLast ? 'Finish ✦' : 'Next Round →'}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(ol);
+  }, 600);
+
+  return true; // signals resolveRound to pause
+}
+
+function dismissTutExplainer(isLast) {
+  const el = document.getElementById('tut-explainer');
+  if (el) el.remove();
+
+  if (isLast) {
+    showTutorialComplete();
+  } else {
+    // Continue to next round
+    state.trash.push(state.userPlayedCard || {}, state.cpuPlayedCard || {});
+    state.userPlayedCard = null;
+    state.cpuPlayedCard  = null;
+    state.round++;
+    clearBattleSlots();
+    tutDealRound();
+  }
+}
+
+function showTutorialComplete() {
+  markTutorialDone();
+  tutorial = null;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal gameover-win" style="max-width:360px;width:90%;padding:40px 32px">
+      <span class="modal-icon">🎓</span>
+      <div class="modal-title">You're Ready!</div>
+      <div class="modal-subtitle" style="margin-bottom:20px">Tutorial complete</div>
+      <div style="font-size:0.82rem;color:var(--text2);line-height:1.8;margin-bottom:24px;text-align:left">
+        <div style="display:flex;gap:8px"><span>✦</span><span>Type advantage <strong style="color:var(--text)">always beats raw power</strong></span></div>
+        <div style="display:flex;gap:8px"><span>✦</span><span>Winner earns <strong style="color:var(--text)">both powers</strong> on type win</span></div>
+        <div style="display:flex;gap:8px"><span>✦</span><span>No advantage? <strong style="color:var(--text)">Higher power wins</strong>, earns own power only</span></div>
+        <div style="display:flex;gap:8px"><span>✦</span><span>Check <strong style="color:var(--text)">How to Play</strong> for all type matchups</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();startGame()">⚔ Begin Battle</button>
+        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();goHome()">⌂ Back to Home</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  playSound('gamewin'); haptic('success');
+}
+
+function skipTutorial() {
+  // Clean up all tutorial elements
+  ['tut-welcome','tut-hint-choose','tut-explainer','tut-hl-hand'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  markTutorialDone();
+  tutorial = null;
+  goHome();
+}
+
+buildStartPreview();
+initEasterEgg();
+loadSettings();
+</script>
+</body>
+</html>
