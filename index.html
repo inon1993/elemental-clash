@@ -3475,8 +3475,13 @@ function showGameOver() {
   const userWon = state.userScore > state.cpuScore;
   const tie = state.userScore === state.cpuScore;
 
-  recordGameStats(userWon, tie);
-  checkAchievements(userWon, tie);
+  const { newBestStreak } = recordGameStats(userWon, tie);
+  const achievementCount = checkAchievements(userWon, tie);
+
+  if (newBestStreak) {
+    const delay = achievementCount > 0 ? achievementCount * 3800 : 800;
+    setTimeout(() => showToast('🔥', 'New Best Streak!', `${newBestStreak} wins in a row`, 'rgba(255,140,0,0.5)'), delay);
+  }
 
   if (userWon) { playSound('gamewin'); haptic('success'); }
   else if (!tie) { playSound('gamelose'); haptic('fail'); }
@@ -4423,12 +4428,13 @@ function saveStats(stats) {
 function recordGameStats(userWon, tie) {
   const stats = loadStats();
   stats.gamesPlayed++;
+  let newBestStreak = null;
 
   if (userWon) {
     stats.gamesWon++;
     stats.currentStreak++;
-    if (stats.currentStreak > 1 && stats.currentStreak === stats.bestStreak + 1) {
-      setTimeout(() => showToast('🔥', 'New Best Streak!', `${stats.currentStreak} wins in a row`, 'rgba(255,140,0,0.5)'), 800);
+    if (stats.currentStreak === stats.bestStreak + 1 && stats.currentStreak > 1) {
+      newBestStreak = stats.currentStreak;
     }
     stats.bestStreak = Math.max(stats.bestStreak, stats.currentStreak);
   } else if (tie) {
@@ -4454,7 +4460,6 @@ function recordGameStats(userWon, tie) {
     if (entry.winner === 'user') {
       stats.cardWinCount[t] = (stats.cardWinCount[t] || 0) + 1;
       stats.biggestRoundScore = Math.max(stats.biggestRoundScore, entry.userPts);
-      // Upset: user won without type advantage and had lower power
       if (!entry.userCard.strong.includes(entry.cpuCard.type) &&
           entry.userCard.power < entry.cpuCard.power) {
         stats.upsets++;
@@ -4463,7 +4468,7 @@ function recordGameStats(userWon, tie) {
   });
 
   saveStats(stats);
-  return stats;
+  return { newBestStreak };
 }
 
 function recordCoinFlip(userWon) {
@@ -4594,6 +4599,8 @@ function checkAchievements(userWon, tie) {
       setTimeout(() => showAchievementToast(id, level), i * 3800);
     });
   }
+
+  return newlyUnlocked.length;
 }
 
 function showToast(icon, label, message, color = 'rgba(201,168,76,0.4)') {
