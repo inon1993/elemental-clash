@@ -23,8 +23,8 @@
     --stone: #78909c;
     --electricity: #ffeb3b;
     --fire: #ff5722;
-    --card-w: 120px;
-    --card-h: 172px;
+    --card-w: 100px;
+    --card-h: 143px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { overflow-x: hidden; }
@@ -328,16 +328,107 @@
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 12px;
     align-items: center;
     justify-content: center;
     pointer-events: none;
     transform-origin: center center;
     max-width: calc(100% - 280px);
+    overflow: visible;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .hand .card {
     pointer-events: all;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    margin: 0 -10px;
+  }
+
+  /* Fan layout - user hand (3 cards) */
+  #user-hand[data-count="3"] .card:nth-child(1) {
+    transform: rotate(-8deg) translate(-4px, 10px);
+    z-index: 1;
+  }
+  #user-hand[data-count="3"] .card:nth-child(2) {
+    transform: rotate(0deg) translate(0px, 0px);
+    z-index: 3;
+  }
+  #user-hand[data-count="3"] .card:nth-child(3) {
+    transform: rotate(8deg) translate(4px, 10px);
+    z-index: 1;
+  }
+
+  /* 2-card hand - user */
+  #user-hand[data-count="2"] .card:nth-child(1) {
+    transform: rotate(-5deg) translate(-2px, 6px);
+    z-index: 1;
+  }
+  #user-hand[data-count="2"] .card:nth-child(2) {
+    transform: rotate(5deg) translate(2px, 6px);
+    z-index: 2;
+  }
+
+  /* 1-card hand - user */
+  #user-hand[data-count="1"] .card:nth-child(1) {
+    transform: rotate(0deg) translate(0, 0);
+    z-index: 1;
+  }
+
+  /* Fan layout - cpu hand (3 cards, mirrored) */
+  #cpu-hand[data-count="3"] .card:nth-child(1) {
+    transform: rotate(8deg) translate(-4px, -10px);
+    z-index: 1;
+  }
+  #cpu-hand[data-count="3"] .card:nth-child(2) {
+    transform: rotate(0deg) translate(0px, 0px);
+    z-index: 3;
+  }
+  #cpu-hand[data-count="3"] .card:nth-child(3) {
+    transform: rotate(-8deg) translate(4px, -10px);
+    z-index: 1;
+  }
+
+  /* 2-card hand - cpu */
+  #cpu-hand[data-count="2"] .card:nth-child(1) {
+    transform: rotate(5deg) translate(-2px, -6px);
+    z-index: 1;
+  }
+  #cpu-hand[data-count="2"] .card:nth-child(2) {
+    transform: rotate(-5deg) translate(2px, -6px);
+    z-index: 2;
+  }
+
+  /* 1-card hand - cpu */
+  #cpu-hand[data-count="1"] .card:nth-child(1) {
+    transform: rotate(0deg) translate(0, 0);
+    z-index: 1;
+  }
+
+  /* Hover — card lifts and straightens (user only) */
+  #user-hand[data-count="3"] .card:nth-child(1):hover {
+    transform: rotate(-2deg) translate(-4px, -12px);
+    z-index: 10;
+  }
+  #user-hand[data-count="3"] .card:nth-child(2):hover {
+    transform: rotate(0deg) translate(0px, -14px);
+    z-index: 10;
+  }
+  #user-hand[data-count="3"] .card:nth-child(3):hover {
+    transform: rotate(2deg) translate(4px, -12px);
+    z-index: 10;
+  }
+  #user-hand[data-count="2"] .card:nth-child(1):hover {
+    transform: rotate(-1deg) translate(-2px, -12px);
+    z-index: 10;
+  }
+  #user-hand[data-count="2"] .card:nth-child(2):hover {
+    transform: rotate(1deg) translate(2px, -12px);
+    z-index: 10;
+  }
+  #user-hand[data-count="1"] .card:nth-child(1):hover {
+    transform: rotate(0deg) translate(0, -14px);
+    z-index: 10;
   }
 
   .player-area.cpu-area {
@@ -524,13 +615,12 @@
   }
 
   .card:hover:not(.cpu-card):not(.back-card):not(.played):not(.disabled) {
-    transform: translateY(-16px) scale(1.05);
+    /* lift handled per nth-child in fan layout */
   }
   .draft-card-wrap .card:hover { transform: none !important; box-shadow: none !important; }
 
   .card.selectable:hover {
     box-shadow: 0 20px 40px rgba(201,168,76,0.3);
-    transform: translateY(-20px) scale(1.08);
   }
 
   .card-inner {
@@ -539,8 +629,8 @@
     border-radius: 12px;
     overflow: hidden;
     border: 2px solid rgba(255,255,255,0.1);
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 22%;
     position: relative;
     background: var(--surface);
   }
@@ -549,6 +639,7 @@
     background: linear-gradient(135deg, #16162a, #1e1e38);
     border-color: var(--border);
     cursor: default;
+    display: flex;
   }
 
   .card-back-pattern {
@@ -569,25 +660,22 @@
   }
 
   .card-art {
-    flex: 1;
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.8rem;
-    position: static;
-    overflow: hidden;
-    width: 100%;
-    text-align: center;
   }
 
   .card-art .card-emoji {
     position: absolute;
-    top: 50%;
+    top: calc(50% + 8px);
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2.8rem;
+    font-size: 2.3rem;
     z-index: 1;
     pointer-events: none;
+    line-height: 1;
   }
 
   .card-art::before {
@@ -602,9 +690,9 @@
   .card-power {
     position: absolute;
     top: 6px;
-    right: 8px;
+    right: 6px;
     font-family: 'Cinzel Decorative', serif;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     font-weight: 900;
     color: white;
     text-shadow: 0 0 8px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5);
@@ -615,11 +703,11 @@
   .card-name {
     position: absolute;
     top: 6px;
-    left: 8px;
+    left: 6px;
     right: 28px;
     font-family: 'Cinzel', serif;
-    font-size: 0.45rem;
-    letter-spacing: 0.5px;
+    font-size: 0.38rem;
+    letter-spacing: 0px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
     z-index: 2;
@@ -628,11 +716,11 @@
   }
 
   .card-footer {
-    padding: 5px 6px 6px;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 6px;
   }
 
   .card-footer-label {
@@ -650,6 +738,7 @@
     font-size: 0.95rem;
     line-height: 1;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  }
   }
 
   /* Element color themes */
@@ -698,7 +787,7 @@
     border-color: #80deea;
     box-shadow: inset 0 0 16px rgba(128,222,234,0.2);
   }
-  .card[data-type="diamond"] .card-power { color: #e0f7fa; text-shadow: 0 0 12px rgba(128,222,234,1), 0 0 24px rgba(128,222,234,0.5); }
+  .card[data-type="diamond"] .card-power { color: #e0f7fa; text-shadow: 0 0 6px rgba(128,222,234,1), 0 0 12px rgba(128,222,234,0.4); }
   .card[data-type="diamond"]::before {
     content: '';
     position: absolute;
@@ -1300,9 +1389,9 @@
     grid-template-columns: repeat(4, var(--card-w));
     gap: 8px;
     flex-shrink: 0;
-    transform: scale(0.82);
+    transform: scale(1.1);
     transform-origin: top center;
-    margin-bottom: calc((var(--card-h) * 2 + 16px) * -0.18);
+    margin-bottom: calc((var(--card-h) * 2 + 16px) * 0.1);
   }
   .draft-grid .draft-card-wrap:nth-child(9) { grid-column: 1 / 3; justify-self: end; }
   .draft-grid .draft-card-wrap:nth-child(10) { grid-column: 3 / 5; justify-self: start; }
@@ -1726,11 +1815,25 @@
   .stack-visual .sv-card:nth-child(3) { transform: rotate(0deg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 
   @media (max-width: 600px) {
-    :root { --card-w: 95px; --card-h: 138px; }
+    :root { --card-w: 80px; --card-h: 115px; }
     .player-area { padding: 10px 16px; }
     .player-info { min-width: unset; }
     .vs-divider { padding: 0 20px; }
     .battle-zone { flex: 0 0 180px; }
+    .hand .card { margin: 0 -8px; }
+    #user-hand[data-count="3"] .card:nth-child(1) { transform: rotate(-8deg) translate(-3px, 8px); }
+    #user-hand[data-count="3"] .card:nth-child(3) { transform: rotate(8deg) translate(3px, 8px); }
+    #cpu-hand[data-count="3"]  .card:nth-child(1) { transform: rotate(8deg) translate(-3px, -8px); }
+    #cpu-hand[data-count="3"]  .card:nth-child(3) { transform: rotate(-8deg) translate(3px, -8px); }
+    #user-hand[data-count="3"] .card:nth-child(1):hover { transform: rotate(-2deg) translate(-3px, -10px); }
+    #user-hand[data-count="3"] .card:nth-child(2):hover { transform: rotate(0deg) translate(0, -12px); }
+    #user-hand[data-count="3"] .card:nth-child(3):hover { transform: rotate(2deg) translate(3px, -10px); }
+    #user-hand[data-count="2"] .card:nth-child(1) { transform: rotate(-5deg) translate(-2px, 6px); }
+    #user-hand[data-count="2"] .card:nth-child(2) { transform: rotate(5deg) translate(2px, 6px); }
+    #user-hand[data-count="2"] .card:nth-child(1):hover { transform: rotate(-1deg) translate(-2px, -10px); }
+    #user-hand[data-count="2"] .card:nth-child(2):hover { transform: rotate(1deg) translate(2px, -10px); }
+    #user-hand[data-count="1"] .card:nth-child(1) { transform: rotate(0deg); }
+    #user-hand[data-count="1"] .card:nth-child(1):hover { transform: rotate(0deg) translate(0, -12px); }
   }
 
   .start-btns {
@@ -3014,6 +3117,7 @@ function renderHands() {
   // CPU hand (face down)
   const cpuHand = document.getElementById('cpu-hand');
   cpuHand.innerHTML = '';
+  cpuHand.dataset.count = state.cpuHand.length;
   state.cpuHand.forEach(() => {
     const el = createCardEl(null, true);
     cpuHand.appendChild(el);
@@ -3022,6 +3126,7 @@ function renderHands() {
   // User hand
   const userHand = document.getElementById('user-hand');
   userHand.innerHTML = '';
+  userHand.dataset.count = state.userHand.length;
   const canPlay = (state.phase === 'play-first' || state.phase === 'play-second') && state.currentTurn === 'user';
   state.userHand.forEach((card, i) => {
     const el = createCardEl(card, false, canPlay ? () => userPlayCard(i) : null);
@@ -3144,8 +3249,8 @@ function startGame() {
   document.getElementById('game-screen').classList.remove('hidden');
 
   const deck = shuffle([...CARDS]);
-  state.userHand = [deck.pop(), deck.pop()];
-  state.cpuHand = [deck.pop(), deck.pop()];
+  state.userHand = [deck.pop(), deck.pop(), deck.pop()];
+  state.cpuHand = [deck.pop(), deck.pop(), deck.pop()];
   state.stack = deck;
   state.userScore = 0;
   state.cpuScore = 0;
@@ -3161,8 +3266,10 @@ function startGame() {
   state.gameLog = [];
 
   clearBattleSlots();
-  document.getElementById('user-hand').innerHTML = '';
-  document.getElementById('cpu-hand').innerHTML = '';
+  const uhEl = document.getElementById('user-hand');
+  const chEl = document.getElementById('cpu-hand');
+  uhEl.innerHTML = ''; uhEl.dataset.count = 3;
+  chEl.innerHTML = ''; chEl.dataset.count = 3;
   setTimeout(doCoinFlip, 400);
 }
 
@@ -3308,6 +3415,9 @@ function animateNewCard(handId) {
     lastCard.style.setProperty('--from-rot', '5deg');
     requestAnimationFrame(() => {
       lastCard.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
+      lastCard.addEventListener('animationend', () => {
+        lastCard.style.animation = '';
+      }, { once: true });
     });
   }
 }
@@ -3748,7 +3858,7 @@ function openHowToPlay() {
         <div>
           <div class="htp-section-title">Setup</div>
           <div class="htp-steps">
-            <div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text">There are <strong>10 elemental cards</strong> in the deck. Each player is dealt <strong>2 cards</strong> to start. The remaining 6 cards form the <strong>draw pile</strong>.</div></div>
+            <div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text">There are <strong>10 elemental cards</strong> in the deck. Each player is dealt <strong>3 cards</strong> to start. The remaining 4 cards form the <strong>draw pile</strong>.</div></div>
             <div class="htp-step"><div class="htp-step-num">2</div><div class="htp-step-text">A <strong>coin is flipped</strong> to decide who plays first.</div></div>
             <div class="htp-step"><div class="htp-step-num">3</div><div class="htp-step-text">From <strong>round 2 onwards</strong>, both players draw 1 card from the pile before playing. The first player draws first — when the pile <strong>glows gold</strong>, click it to draw your card!</div></div>
           </div>
@@ -4154,7 +4264,8 @@ function processDraftTurn() {
   } else {
     statusEl.textContent = `CPU is picking... ${draft.cpuHand.length + 1} of 5`;
     statusEl.className = 'draft-status cpu-turn';
-    setTimeout(() => cpuDraftPick(), 1200);
+    const delay = draft.pickIndex === 0 ? 1800 : 1200;
+    setTimeout(() => cpuDraftPick(), delay);
   }
 }
 
@@ -4209,12 +4320,12 @@ function launchDraftGame() {
   document.getElementById('game-screen').classList.remove('hidden');
   history.pushState({ screen: 'game' }, '');
 
-  // Shuffle each drafted hand, deal 2 into hand, rest become personal pile
+  // Shuffle each drafted hand, deal 3 into hand, rest become personal pile
   const userDrafted = shuffle([...draft.userHand]);
   const cpuDrafted  = shuffle([...draft.cpuHand]);
 
-  state.userHand       = [userDrafted.pop(), userDrafted.pop()];
-  state.cpuHand        = [cpuDrafted.pop(),  cpuDrafted.pop()];
+  state.userHand       = [userDrafted.pop(), userDrafted.pop(), userDrafted.pop()];
+  state.cpuHand        = [cpuDrafted.pop(),  cpuDrafted.pop(),  cpuDrafted.pop()];
   state.userStack      = userDrafted; // personal pile (2 cards)
   state.cpuStack       = cpuDrafted;  // personal pile (2 cards)
   state.stack          = [];          // shared stack unused in draft
@@ -4230,12 +4341,12 @@ function launchDraftGame() {
   state.gameLog        = [];
 
   clearBattleSlots();
-  document.getElementById('user-hand').innerHTML = '';
-  document.getElementById('cpu-hand').innerHTML  = '';
+  const uhEl2 = document.getElementById('user-hand');
+  const chEl2 = document.getElementById('cpu-hand');
+  uhEl2.innerHTML = ''; uhEl2.dataset.count = 3;
+  chEl2.innerHTML = ''; chEl2.dataset.count = 3;
   setTimeout(doCoinFlip, 400);
 }
-
-// ===== BACK BUTTON HANDLING =====
 history.replaceState({ screen: 'home' }, '');
 history.pushState({ screen: 'guard' }, '');
 
@@ -5114,6 +5225,10 @@ function closeGameLog() {
 }
 
 // ===== INIT =====
+// Prevent long-press context menu / selection on hands
+document.getElementById('user-hand').addEventListener('contextmenu', e => e.preventDefault());
+document.getElementById('cpu-hand').addEventListener('contextmenu', e => e.preventDefault());
+
 // Ripple effect on tap
 document.addEventListener('pointerdown', e => {
   const ripple = document.createElement('div');
