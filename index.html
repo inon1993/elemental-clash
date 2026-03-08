@@ -704,10 +704,10 @@
     position: absolute;
     top: 6px;
     left: 6px;
-    right: 28px;
+    right: 22px;
     font-family: 'Cinzel', serif;
-    font-size: 0.38rem;
-    letter-spacing: 0px;
+    font-size: 8px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
     z-index: 2;
@@ -743,38 +743,43 @@
 
   /* Element color themes */
   .card[data-type="plant"] .card-art { background: linear-gradient(135deg, #1a3a1a, #2d5a2d); }
-  .card[data-type="plant"] .card-inner { border-color: #4caf5066; }
+  .card[data-type="plant"] .card-inner { border-color: #4caf5066; background: linear-gradient(135deg, #1a3a1a, #2d5a2d); }
+  .card[data-type="plant"] .card-footer { background: rgba(20,50,20,0.85); }
   .card[data-type="wind"] .card-art { background: linear-gradient(135deg, #1a3535, #1e4a47); }
-  .card[data-type="wind"] .card-inner { border-color: #80cbc466; }
+  .card[data-type="wind"] .card-inner { border-color: #80cbc466; background: linear-gradient(135deg, #1a3535, #1e4a47); }
+  .card[data-type="wind"] .card-footer { background: rgba(20,50,50,0.85); }
   .card[data-type="ground"] .card-art { background: linear-gradient(135deg, #2e1e18, #4a3028); }
-  .card[data-type="ground"] .card-inner { border-color: #a1887f66; }
+  .card[data-type="ground"] .card-inner { border-color: #a1887f66; background: linear-gradient(135deg, #2e1e18, #4a3028); }
+  .card[data-type="ground"] .card-footer { background: rgba(40,20,15,0.85); }
   .card[data-type="ice"] .card-art { background: linear-gradient(135deg, #1a2e40, #1e3a52); }
-  .card[data-type="ice"] .card-inner { border-color: #b3e5fc66; }
+  .card[data-type="ice"] .card-inner { border-color: #b3e5fc66; background: linear-gradient(135deg, #1a2e40, #1e3a52); }
+  .card[data-type="ice"] .card-footer { background: rgba(15,30,55,0.85); }
   .card[data-type="water"] .card-art { background: linear-gradient(135deg, #0d1e40, #0d2456); }
-  .card[data-type="water"] .card-inner { border-color: #2196f366; }
+  .card[data-type="water"] .card-inner { border-color: #2196f366; background: linear-gradient(135deg, #0d1e40, #0d2456); }
+  .card[data-type="water"] .card-footer { background: rgba(10,20,55,0.85); }
   .card[data-type="stone"] .card-art { background: linear-gradient(135deg, #1a1e22, #22282e); }
-  .card[data-type="stone"] .card-inner { border-color: #78909c66; }
+  .card[data-type="stone"] .card-inner { border-color: #78909c66; background: linear-gradient(135deg, #1a1e22, #22282e); }
+  .card[data-type="stone"] .card-footer { background: rgba(20,22,28,0.85); }
   .card[data-type="electricity"] .card-art { background: linear-gradient(135deg, #2e2800, #3a3200); }
-  .card[data-type="electricity"] .card-inner { border-color: #ffeb3b66; }
+  .card[data-type="electricity"] .card-inner { border-color: #ffeb3b66; background: linear-gradient(135deg, #2e2800, #3a3200); }
+  .card[data-type="electricity"] .card-footer { background: rgba(35,30,0,0.85); }
   .card[data-type="fire"] .card-art { background: linear-gradient(135deg, #3a0d00, #5a1800); }
-  .card[data-type="fire"] .card-inner { border-color: #ff572266; }
+  .card[data-type="fire"] .card-inner { border-color: #ff572266; background: linear-gradient(135deg, #3a0d00, #5a1800); }
+  .card[data-type="fire"] .card-footer { background: rgba(40,8,0,0.85); }
 
   /* ===== LEGENDARY CARDS ===== */
-  .card[data-type="steel"] .card-art { background: linear-gradient(135deg, #1a1f24, #2c3540); }
+  /* Steel — darker animated metallic background so emoji is visible */
   .card[data-type="steel"] .card-inner {
     border-color: #90a4ae;
-    box-shadow: inset 0 0 12px rgba(176,190,197,0.15);
-  }
-  .card[data-type="steel"] .card-power { color: #cfd8dc; text-shadow: 0 0 10px rgba(176,190,197,0.8), 0 2px 4px rgba(0,0,0,0.8); }
-  .card[data-type="steel"]::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #546e7a, #90a4ae, #546e7a, #b0bec5, #546e7a);
+    background: linear-gradient(135deg, #1e2a30, #2c3e48, #37515e, #2c3e48, #1e2a30);
     background-size: 300% 300%;
     animation: steelShimmer 3s ease infinite;
-    z-index: -1;
+  }
+  .card[data-type="steel"] .card-art {
+    background: transparent;
+  }
+  .card[data-type="steel"] .card-footer {
+    background: rgba(15,22,28,0.9);
   }
   @keyframes steelShimmer {
     0%   { background-position: 0% 0%; }
@@ -782,26 +787,56 @@
     100% { background-position: 0% 0%; }
   }
 
-  .card[data-type="diamond"] .card-art { background: linear-gradient(135deg, #0d1a2e, #0a1628); }
+
+  /* Diamond — animated prismatic rainbow background */
   .card[data-type="diamond"] .card-inner {
     border-color: #80deea;
-    box-shadow: inset 0 0 16px rgba(128,222,234,0.2);
-  }
-  .card[data-type="diamond"] .card-power { color: #e0f7fa; text-shadow: 0 0 6px rgba(128,222,234,1), 0 0 12px rgba(128,222,234,0.4); }
-  .card[data-type="diamond"]::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #f06292, #ba68c8, #4fc3f7, #4db6ac, #f06292, #fff176, #f06292);
+    background: linear-gradient(135deg, #4a0080, #0050c0, #006080, #600090, #900040, #0040a0, #8000a0);
     background-size: 400% 400%;
     animation: diamondPrismatic 4s linear infinite;
-    z-index: -1;
+    box-shadow: inset 0 0 20px rgba(128,222,234,0.25);
+  }
+  .card[data-type="diamond"] .card-art {
+    background: transparent;
+  }
+  .card[data-type="diamond"] .card-footer {
+    background: rgba(20,0,40,0.85);
+  }
+  .card[data-type="diamond"] .card-power {
+    color: #e0f7fa;
+    text-shadow: 0 0 6px rgba(128,222,234,1), 0 0 12px rgba(128,222,234,0.4);
   }
   @keyframes diamondPrismatic {
     0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
+    25%  { background-position: 100% 0%; }
+    50%  { background-position: 100% 100%; }
+    75%  { background-position: 0% 100%; }
     100% { background-position: 0% 50%; }
+  }
+
+  .card[data-type="steel"] .card-power {
+    color: #cfd8dc;
+    text-shadow: 0 0 10px rgba(176,190,197,0.8), 0 2px 4px rgba(0,0,0,0.8);
+  }
+
+  /* Legendary card name gradient text */
+  .card[data-type="steel"] .card-name {
+    background: linear-gradient(90deg, #90a4ae, #cfd8dc, #90a4ae);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .card[data-type="diamond"] .card-name {
+    background: linear-gradient(90deg, #f06292, #ce93d8, #4fc3f7, #4db6ac, #fff176, #f06292);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: diamondTextShimmer 3s linear infinite;
+  }
+  @keyframes diamondTextShimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
   }
 
   /* Legendary card hover glow */
