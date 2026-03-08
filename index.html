@@ -23,8 +23,8 @@
     --stone: #78909c;
     --electricity: #ffeb3b;
     --fire: #ff5722;
-    --card-w: 110px;
-    --card-h: 160px;
+    --card-w: 120px;
+    --card-h: 172px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { overflow-x: hidden; }
@@ -55,7 +55,7 @@
   }
 
   /* ===== SCREENS ===== */
-  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.6s, transform 0.6s; }
+  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.6s, transform 0.6s; overflow: visible; }
   .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
 
   /* START SCREEN */
@@ -278,10 +278,11 @@
     border: 1px solid rgba(255,255,255,0.07);
     flex: 1;
     justify-content: center;
+    min-height: 52px;
   }
   .log-card.winner-card { border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.06); }
   .log-card.loser-card  { opacity: 0.5; }
-  .log-card-emoji { font-size: 1.1rem; }
+  .log-card-emoji { font-size: 1.1rem; display: flex; align-items: center; line-height: 1; }
   .log-card-info { display: flex; flex-direction: column; }
   .log-card-name { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 1px; color: var(--text); text-transform: uppercase; }
   .log-card-pts  { font-size: 0.65rem; color: var(--gold2); font-family: 'Cinzel Decorative', serif; }
@@ -292,6 +293,12 @@
     gap: 0;
     align-items: stretch;
     justify-content: stretch;
+    padding: 0;
+  }
+  #draft-screen {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     padding: 0;
   }
 
@@ -313,7 +320,7 @@
     justify-content: space-between;
     padding: 12px 32px;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .hand {
@@ -326,6 +333,7 @@
     justify-content: center;
     pointer-events: none;
     transform-origin: center center;
+    max-width: calc(100% - 280px);
   }
 
   .hand .card {
@@ -388,6 +396,14 @@
     align-items: center;
     gap: 8px;
     min-width: 100px;
+    flex-shrink: 0;
+  }
+  #draw-pile-area {
+    position: absolute;
+    right: 32px;
+    bottom: 0;
+    height: 50%;
+    justify-content: center;
   }
 
   .trash-inline {
@@ -558,8 +574,20 @@
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    position: relative;
+    position: static;
     overflow: hidden;
+    width: 100%;
+    text-align: center;
+  }
+
+  .card-art .card-emoji {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.8rem;
+    z-index: 1;
+    pointer-events: none;
   }
 
   .card-art::before {
@@ -568,6 +596,7 @@
     inset: 0;
     opacity: 0.2;
     border-radius: 2px;
+    pointer-events: none;
   }
 
   .card-power {
@@ -587,12 +616,15 @@
     position: absolute;
     top: 6px;
     left: 8px;
+    right: 28px;
     font-family: 'Cinzel', serif;
-    font-size: 0.5rem;
-    letter-spacing: 1px;
+    font-size: 0.45rem;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.8);
     z-index: 2;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .card-footer {
@@ -637,6 +669,55 @@
   .card[data-type="electricity"] .card-inner { border-color: #ffeb3b66; }
   .card[data-type="fire"] .card-art { background: linear-gradient(135deg, #3a0d00, #5a1800); }
   .card[data-type="fire"] .card-inner { border-color: #ff572266; }
+
+  /* ===== LEGENDARY CARDS ===== */
+  .card[data-type="steel"] .card-art { background: linear-gradient(135deg, #1a1f24, #2c3540); }
+  .card[data-type="steel"] .card-inner {
+    border-color: #90a4ae;
+    box-shadow: inset 0 0 12px rgba(176,190,197,0.15);
+  }
+  .card[data-type="steel"] .card-power { color: #cfd8dc; text-shadow: 0 0 10px rgba(176,190,197,0.8), 0 2px 4px rgba(0,0,0,0.8); }
+  .card[data-type="steel"]::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #546e7a, #90a4ae, #546e7a, #b0bec5, #546e7a);
+    background-size: 300% 300%;
+    animation: steelShimmer 3s ease infinite;
+    z-index: -1;
+  }
+  @keyframes steelShimmer {
+    0%   { background-position: 0% 0%; }
+    50%  { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  .card[data-type="diamond"] .card-art { background: linear-gradient(135deg, #0d1a2e, #0a1628); }
+  .card[data-type="diamond"] .card-inner {
+    border-color: #80deea;
+    box-shadow: inset 0 0 16px rgba(128,222,234,0.2);
+  }
+  .card[data-type="diamond"] .card-power { color: #e0f7fa; text-shadow: 0 0 12px rgba(128,222,234,1), 0 0 24px rgba(128,222,234,0.5); }
+  .card[data-type="diamond"]::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f06292, #ba68c8, #4fc3f7, #4db6ac, #f06292, #fff176, #f06292);
+    background-size: 400% 400%;
+    animation: diamondPrismatic 4s linear infinite;
+    z-index: -1;
+  }
+  @keyframes diamondPrismatic {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Legendary card hover glow */
+  .card[data-type="steel"].selectable:hover { box-shadow: 0 20px 40px rgba(176,190,197,0.4); }
+  .card[data-type="diamond"].selectable:hover { box-shadow: 0 20px 50px rgba(128,222,234,0.5), 0 0 30px rgba(240,98,146,0.3); }
 
   /* Glow on hover */
   .card[data-type="plant"].selectable:hover { box-shadow: 0 20px 40px rgba(76,175,80,0.3); }
@@ -1124,6 +1205,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 16px;
     width: 100%;
     max-width: 480px;
@@ -1138,12 +1220,6 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-  }
-  .draft-title {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 1.4rem;
-    color: var(--gold);
-    letter-spacing: 4px;
   }
   .draft-status {
     font-family: 'Cinzel', serif;
@@ -1179,22 +1255,24 @@
   .draft-picks-label.user-label { color: #80ff80; }
   .draft-picks-hand {
     display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
+    gap: 4px;
+    flex-wrap: nowrap;
     justify-content: center;
-    min-height: 44px;
+    min-height: 38px;
+    width: 100%;
   }
   .draft-pick-chip {
-    width: 36px;
-    height: 44px;
-    border-radius: 6px;
+    width: 28px;
+    height: 38px;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1px;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     animation: cardSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    flex-shrink: 0;
   }
   .draft-pick-chip.user-chip {
     background: rgba(128,255,128,0.08);
@@ -1219,10 +1297,15 @@
 
   .draft-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, var(--card-w));
     gap: 8px;
-    width: 100%;
+    flex-shrink: 0;
+    transform: scale(0.82);
+    transform-origin: top center;
+    margin-bottom: calc((var(--card-h) * 2 + 16px) * -0.18);
   }
+  .draft-grid .draft-card-wrap:nth-child(9) { grid-column: 1 / 3; justify-self: end; }
+  .draft-grid .draft-card-wrap:nth-child(10) { grid-column: 3 / 5; justify-self: start; }
   .draft-card-wrap {
     position: relative;
     cursor: pointer;
@@ -1643,8 +1726,9 @@
   .stack-visual .sv-card:nth-child(3) { transform: rotate(0deg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 
   @media (max-width: 600px) {
-    :root { --card-w: 85px; --card-h: 125px; }
+    :root { --card-w: 95px; --card-h: 138px; }
     .player-area { padding: 10px 16px; }
+    .player-info { min-width: unset; }
     .vs-divider { padding: 0 20px; }
     .battle-zone { flex: 0 0 180px; }
   }
@@ -1972,6 +2056,17 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
+  .htp-cards-grid .htp-card-row:nth-child(9) { grid-column: unset; }
+  .htp-cards-grid .htp-card-row:nth-child(10) { grid-column: unset; }
+  .htp-legendary-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+  .htp-legendary-row .htp-card-row {
+    width: calc(25% - 4px);
+  }
   .htp-card-row {
     display: flex;
     flex-direction: column;
@@ -1988,6 +2083,7 @@
   .htp-card-row .cr-power { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text); }
   .htp-card-row .cr-strong { font-size: 0.85rem; display: flex; gap: 3px; justify-content: center; }
   .htp-card-row .cr-label { font-size: 0.5rem; color: var(--text2); letter-spacing: 1px; }
+  .htp-card-row-legendary { background: rgba(255,255,255,0.04); }
 
   .htp-tip {
     display: flex;
@@ -2040,6 +2136,8 @@
   .orbit-node[data-type="stone"]       { background: linear-gradient(135deg,#1a1e22,#22282e); border-color:#78909c66; }
   .orbit-node[data-type="electricity"] { background: linear-gradient(135deg,#2e2800,#3a3200); border-color:#ffeb3b66; }
   .orbit-node[data-type="fire"]        { background: linear-gradient(135deg,#3a0d00,#5a1800); border-color:#ff572266; }
+  .orbit-node[data-type="steel"]       { background: linear-gradient(135deg,#1a1f24,#2c3540); border-color:#90a4ae; }
+  .orbit-node[data-type="diamond"]     { background: linear-gradient(135deg,#0d1a2e,#0a1628); border-color:#80deea; }
   /* pause on hover - removed, ring always rotates */
   .orbit-ring:hover .orbit-node { animation-play-state: running; }
 
@@ -2364,7 +2462,7 @@
         <span class="more-item-icon">🎭</span>
         <div class="more-item-text">
           <div class="more-item-label">Draft</div>
-          <div class="more-item-desc">Take turns picking your 4 cards before the battle begins</div>
+          <div class="more-item-desc">Take turns picking your 5 cards before the battle begins</div>
         </div>
         <span class="more-item-arrow">›</span>
       </button>
@@ -2382,9 +2480,20 @@
 
 <!-- DRAFT SCREEN -->
 <div class="screen hidden" id="draft-screen">
+  <div class="top-bar">
+    <button class="top-bar-btn" onclick="goHome()">⌂ Home</button>
+    <div class="top-bar-center">
+      <div class="top-bar-title">DRAFT</div>
+    </div>
+    <div class="menu-wrap">
+      <button class="top-bar-btn" onclick="toggleMenu()">☰ Menu</button>
+      <div class="menu-dropdown" id="draft-menu">
+        <button class="menu-item" onclick="openHowToPlay(); closeMenu()">? Rules</button>
+      </div>
+    </div>
+  </div>
   <div class="draft-layout">
     <div class="draft-header">
-      <div class="draft-title">DRAFT</div>
       <div class="draft-status" id="draft-status"></div>
     </div>
     <div class="draft-picks">
@@ -2464,7 +2573,7 @@
         <div class="trash-inline">🗑 <span id="cpu-trash-count">0</span></div>
       </div>
       <div class="hand" id="cpu-hand"></div>
-      <div class="side-area">
+      <div class="side-area" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">
         <div class="stack-label" id="cpu-pile-label" style="display:none">CPU Pile</div>
         <div class="stack-visual" id="cpu-stack-visual" style="display:none;opacity:0.2">
           <div class="sv-card"></div>
@@ -2508,8 +2617,7 @@
         <div class="player-score"><span class="score-label">Score</span><span class="score-value" id="user-score">0</span><span class="survival-score-target hidden" id="user-score-target"></span></div>
         <div class="trash-inline">🗑 <span id="trash-count">0</span></div>
       </div>
-      <div class="hand" id="user-hand"></div>
-      <div class="side-area">
+      <div class="side-area" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">
         <div class="stack-label">Draw Pile</div>
         <div class="stack-visual" id="stack-visual" onclick="userDrawCard()">
           <div class="sv-card"></div>
@@ -2518,6 +2626,7 @@
         </div>
         <div class="stack-count" id="stack-count">4</div>
       </div>
+      <div class="hand" id="user-hand"></div>
     </div>
   </div>
 </div>
@@ -2560,11 +2669,14 @@ const CARDS = [
   { type: 'stone',       label: 'Stone',   power: 6, emoji: '🪨', strong: ['fire', 'plant'],          color: '#78909c' },
   { type: 'electricity', label: 'Elec.',   power: 7, emoji: '⚡', strong: ['water', 'wind'],          color: '#ffeb3b' },
   { type: 'fire',        label: 'Fire',    power: 8, emoji: '🔥', strong: ['plant', 'ice'],           color: '#ff5722' },
+  { type: 'steel',       label: 'Steel',   power: 9, emoji: '⛓️', strong: ['ice', 'wind'],              color: '#b0bec5', legendary: true },
+  { type: 'diamond',     label: 'Diamond', power: 10, emoji: '💎', strong: [],                         color: '#e0f7fa', legendary: true },
 ];
 
 const TYPE_EMOJI = {
   plant: '🌿', wind: '💨', ground: '⛰️', ice: '❄️',
-  water: '💧', stone: '🪨', electricity: '⚡', fire: '🔥'
+  water: '💧', stone: '🪨', electricity: '⚡', fire: '🔥',
+  steel: '⛓️', diamond: '💎'
 };
 
 // ===== GAME STATE =====
@@ -2884,10 +2996,8 @@ function createCardEl(cardData, faceDown = false, onClick = null) {
       <div class="card-inner">
         <div class="card-name">${cardData.label}</div>
         <div class="card-power">${cardData.power}</div>
-        <div class="card-art" style="font-size:2.6rem">${cardData.emoji}</div>
-        <div class="card-footer">
-          <div class="strong-icons">${strongIcons}</div>
-        </div>
+        <div class="card-art"><span class="card-emoji">${cardData.emoji}</span></div>
+        ${strongIcons ? `<div class="card-footer"><div class="strong-icons">${strongIcons}</div></div>` : ''}
       </div>
     `;
   }
@@ -2923,6 +3033,16 @@ function renderHands() {
   document.getElementById('user-score').textContent = state.userScore;
   const stackCount = draft ? (state.userStack || []).length : state.stack.length;
   document.getElementById('stack-count').textContent = stackCount;
+  // Hide draw pile label+count in survival (infinite deck, not relevant)
+  const stackLabel = document.querySelector('.stack-label');
+  const stackCountEl = document.getElementById('stack-count');
+  if (survival) {
+    if (stackLabel) stackLabel.style.visibility = 'hidden';
+    stackCountEl.style.visibility = 'hidden';
+  } else {
+    if (stackLabel) stackLabel.style.visibility = '';
+    stackCountEl.style.visibility = '';
+  }
 
   // CPU pile — only visible in draft mode
   const cpuPileEls = ['cpu-pile-label', 'cpu-stack-visual', 'cpu-stack-count'];
@@ -2934,8 +3054,9 @@ function renderHands() {
   } else {
     cpuPileEls.forEach(id => document.getElementById(id).style.display = 'none');
   }
-  document.getElementById('trash-count').textContent = state.trash.length;
-  document.getElementById('cpu-trash-count').textContent = state.trash.length;
+  const trashDisplay = survival ? (state.survivalTrashCount || 0) + state.trash.length : state.trash.length;
+  document.getElementById('trash-count').textContent = trashDisplay;
+  document.getElementById('cpu-trash-count').textContent = trashDisplay;
   document.getElementById('round-num').textContent = state.round;
 
   // Stack glow when user should draw
@@ -3028,6 +3149,9 @@ function startGame() {
   state.stack = deck;
   state.userScore = 0;
   state.cpuScore = 0;
+  state.survivalTrashCount = 0;
+  document.getElementById('user-score').textContent = '0';
+  document.getElementById('cpu-score').textContent = '0';
   state.trash = [];
   state.round = 1;
   state.firstPlayer = null;
@@ -3169,6 +3293,7 @@ function drawCardFor(who) {
     const inPlayTypes = new Set(inPlay.map(c => c.type));
     const refillCards = CARDS.filter(c => !inPlayTypes.has(c.type));
     state.stack = shuffle([...refillCards]);
+    state.survivalTrashCount = (state.survivalTrashCount || 0) + state.trash.length;
     state.trash = [];
   }
 }
@@ -3226,15 +3351,15 @@ function cpuPickCardIndex() {
       const cpuBeatsUser = cpuCard.strong.includes(userCard.type);
       const userBeatsCpu = userCard.strong.includes(cpuCard.type);
 
-      if (cpuBeatsUser && !userBeatsCpu) {
-        // Winning by type — prefer the card with highest combined points
+      if (cpuCard.type === 'diamond') {
+        // Diamond always wins on power unless vs another diamond
+        score = userCard.type === 'diamond' ? 200 : 900 + cpuCard.power;
+      } else if (cpuBeatsUser && !userBeatsCpu) {
         score = 1000 + cpuCard.power + userCard.power;
       } else if (!cpuBeatsUser && !userBeatsCpu) {
-        // Pure power battle — only play if we win on power
         if (cpuCard.power > userCard.power) {
           score = 500 + cpuCard.power;
         } else {
-          // We lose on power — play our weakest card to minimise loss
           score = 100 - cpuCard.power;
         }
       } else {
@@ -3246,19 +3371,20 @@ function cpuPickCardIndex() {
       // === CPU plays FIRST — user hand is known, play strategically ===
       const userHand = state.userHand;
 
-      // Count how many user cards this cpu card beats
-      const counters = userHand.filter(uc => cpuCard.strong.includes(uc.type)).length;
-      // Count how many user cards beat this cpu card
-      const vulnerabilities = userHand.filter(uc => uc.strong.includes(cpuCard.type)).length;
-      // Count neutral matchups we'd win on power
-      const powerWins = userHand.filter(uc =>
-        !cpuCard.strong.includes(uc.type) && !uc.strong.includes(cpuCard.type) && cpuCard.power > uc.power
-      ).length;
+      if (cpuCard.type === 'diamond') {
+        score = 600 + cpuCard.power;
+      } else {
+        const counters = userHand.filter(uc => cpuCard.strong.includes(uc.type)).length;
+        const vulnerabilities = userHand.filter(uc => uc.strong.includes(cpuCard.type)).length;
+        const powerWins = userHand.filter(uc =>
+          !cpuCard.strong.includes(uc.type) && !uc.strong.includes(cpuCard.type) && cpuCard.power > uc.power
+        ).length;
 
-      score = (counters * 30)         // strongly reward type counters
-            + (powerWins * 10)        // reward power wins
-            - (vulnerabilities * 25)  // punish vulnerability
-            + cpuCard.power;          // tiebreak by power
+        score = (counters * 30)
+              + (powerWins * 10)
+              - (vulnerabilities * 25)
+              + cpuCard.power;
+      }
     }
 
     return { i, score };
@@ -3358,11 +3484,11 @@ function resolveRound() {
 
   if (uStrong && !cStrong) {
     winner = 'user';
-    userPts = uCard.power + cCard.power;
+    userPts = uCard.type === 'diamond' ? uCard.power : uCard.power + cCard.power;
     reason = uCard.type + ' beats ' + cCard.type + '!';
   } else if (cStrong && !uStrong) {
     winner = 'cpu';
-    cpuPts = uCard.power + cCard.power;
+    cpuPts = cCard.type === 'diamond' ? cCard.power : uCard.power + cCard.power;
     reason = cCard.type + ' beats ' + uCard.type + '!';
   } else {
     // Both strong or neither — compare power
@@ -3622,7 +3748,7 @@ function openHowToPlay() {
         <div>
           <div class="htp-section-title">Setup</div>
           <div class="htp-steps">
-            <div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text">There are <strong>8 elemental cards</strong> in the deck. Each player is dealt <strong>2 cards</strong> to start. The remaining 4 cards form the <strong>draw pile</strong>.</div></div>
+            <div class="htp-step"><div class="htp-step-num">1</div><div class="htp-step-text">There are <strong>10 elemental cards</strong> in the deck. Each player is dealt <strong>2 cards</strong> to start. The remaining 6 cards form the <strong>draw pile</strong>.</div></div>
             <div class="htp-step"><div class="htp-step-num">2</div><div class="htp-step-text">A <strong>coin is flipped</strong> to decide who plays first.</div></div>
             <div class="htp-step"><div class="htp-step-num">3</div><div class="htp-step-text">From <strong>round 2 onwards</strong>, both players draw 1 card from the pile before playing. The first player draws first — when the pile <strong>glows gold</strong>, click it to draw your card!</div></div>
           </div>
@@ -3713,7 +3839,7 @@ function openHowToPlay() {
 
         <!-- ALL CARDS -->
         <div>
-          <div class="htp-section-title">All 8 Cards</div>
+          <div class="htp-section-title">All 10 Cards</div>
           <div class="htp-cards-grid">
             <div class="htp-card-row"><div class="cr-emoji">🌿</div><div class="cr-name">Plant</div><div class="cr-power">PWR 1</div><div class="cr-label">beats</div><div class="cr-strong">💧⛰️</div></div>
             <div class="htp-card-row"><div class="cr-emoji">💨</div><div class="cr-name">Wind</div><div class="cr-power">PWR 2</div><div class="cr-label">beats</div><div class="cr-strong">🔥🌿</div></div>
@@ -3723,6 +3849,19 @@ function openHowToPlay() {
             <div class="htp-card-row"><div class="cr-emoji">🪨</div><div class="cr-name">Stone</div><div class="cr-power">PWR 6</div><div class="cr-label">beats</div><div class="cr-strong">🔥🌿</div></div>
             <div class="htp-card-row"><div class="cr-emoji">⚡</div><div class="cr-name">Elec.</div><div class="cr-power">PWR 7</div><div class="cr-label">beats</div><div class="cr-strong">💧💨</div></div>
             <div class="htp-card-row"><div class="cr-emoji">🔥</div><div class="cr-name">Fire</div><div class="cr-power">PWR 8</div><div class="cr-label">beats</div><div class="cr-strong">🌿❄️</div></div>
+            <div class="htp-legendary-row">
+              <div class="htp-card-row htp-card-row-legendary" style="border-color:rgba(176,190,197,0.4)"><div class="cr-emoji">⛓️</div><div class="cr-name" style="color:#90a4ae">Steel</div><div class="cr-power">PWR 9</div><div class="cr-label">beats</div><div class="cr-strong">❄️💨</div></div>
+              <div class="htp-card-row htp-card-row-legendary" style="border-color:rgba(128,222,234,0.4)"><div class="cr-emoji">💎</div><div class="cr-name" style="background:linear-gradient(90deg,#f06292,#4fc3f7,#4db6ac);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Diamond</div><div class="cr-power" style="color:#80deea">PWR 10</div><div class="cr-label">no weakness</div><div class="cr-strong" style="font-size:0.6rem;color:var(--text2)">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEGENDARY CARDS -->
+        <div>
+          <div class="htp-section-title" style="background:linear-gradient(90deg,#90a4ae,#80deea,#f06292);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Legendary Cards</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="htp-tip"><div class="htp-tip-icon">⛓️</div><div class="htp-tip-text"><strong style="color:#90a4ae">Steel (PWR 9)</strong> has type advantage over <strong>Ice</strong> and <strong>Wind</strong>, and wins most matchups on raw power. A dominant card — but Diamond still beats it.</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">💎</div><div class="htp-tip-text"><strong style="color:#80deea">Diamond (PWR 10)</strong> is invincible — no card has a type advantage against it. However, since it holds no type advantage itself, it <strong>always earns only its own 10 points</strong>, never the opponent's power on top.</div></div>
           </div>
         </div>
 
@@ -3949,7 +4088,7 @@ function showDraftCoinFlip(goesFirst) {
 function openDraftScreen(firstPicker) {
   // Build alternating pick order: 8 picks total
   draft.pickOrder = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     draft.pickOrder.push(i % 2 === 0 ? firstPicker : (firstPicker === 'user' ? 'cpu' : 'user'));
   }
   draft.pickIndex = 0;
@@ -3982,7 +4121,7 @@ function openDraftScreen(firstPicker) {
 }
 
 function processDraftTurn() {
-  if (draft.pickIndex >= 8) {
+  if (draft.pickIndex >= 10) {
     // All picked — launch game
     document.getElementById('draft-status').textContent = 'Draft complete!';
     document.getElementById('draft-status').className = 'draft-status';
@@ -4003,7 +4142,7 @@ function processDraftTurn() {
   });
 
   if (picker === 'user') {
-    statusEl.textContent = `Your pick — ${draft.userHand.length + 1} of 4`;
+    statusEl.textContent = `Your pick — ${draft.userHand.length + 1} of 5`;
     statusEl.className = 'draft-status your-turn';
     CARDS.forEach(card => {
       const el = document.getElementById(`dcard-${card.type}`);
@@ -4013,7 +4152,7 @@ function processDraftTurn() {
       }
     });
   } else {
-    statusEl.textContent = `CPU is picking... ${draft.cpuHand.length + 1} of 4`;
+    statusEl.textContent = `CPU is picking... ${draft.cpuHand.length + 1} of 5`;
     statusEl.className = 'draft-status cpu-turn';
     setTimeout(() => cpuDraftPick(), 1200);
   }
@@ -4457,12 +4596,14 @@ function recordGameStats(userWon, tie) {
   state.gameLog.forEach(entry => {
     const t = entry.userCard.type;
     stats.cardPlayCount[t] = (stats.cardPlayCount[t] || 0) + 1;
-    if (entry.winner === 'user') {
-      stats.cardWinCount[t] = (stats.cardWinCount[t] || 0) + 1;
-      stats.biggestRoundScore = Math.max(stats.biggestRoundScore, entry.userPts);
-      if (!entry.userCard.strong.includes(entry.cpuCard.type) &&
-          entry.userCard.power < entry.cpuCard.power) {
-        stats.upsets++;
+    if (!entry.userCard.legendary) {
+      if (entry.winner === 'user') {
+        stats.cardWinCount[t] = (stats.cardWinCount[t] || 0) + 1;
+        stats.biggestRoundScore = Math.max(stats.biggestRoundScore, entry.userPts);
+        if (!entry.userCard.strong.includes(entry.cpuCard.type) &&
+            entry.userCard.power < entry.cpuCard.power) {
+          stats.upsets++;
+        }
       }
     }
   });
@@ -4751,6 +4892,8 @@ function openStats() {
   let mostWinsCard = '—';
   let mostWins = 0;
   Object.entries(stats.cardWinCount).forEach(([type, wins]) => {
+    const card = CARDS.find(c => c.type === type);
+    if (card && card.legendary) return;
     if (wins > mostWins) { mostWins = wins; mostWinsCard = type; }
   });
   const mostWinsData = CARDS.find(c => c.type === mostWinsCard);
@@ -4807,8 +4950,9 @@ function openStats() {
           <div class="htp-section-title">Cards</div>
           <div class="stats-grid">
             <div class="stat-box"><div class="stat-val">${favDisplay.split(' ')[0]}</div><div class="stat-val" style="font-size:0.8rem;margin-top:4px">${favDisplay.split(' ').slice(1).join(' ')}</div><div class="stat-lbl">Most Played</div></div>
-            <div class="stat-box"><div class="stat-val">${mostWinsDisplay.split(' ')[0]}</div><div class="stat-val" style="font-size:0.8rem;margin-top:4px">${mostWinsDisplay.split(' ').slice(1).join(' ')}</div><div class="stat-lbl">Most Wins</div></div>
+            <div class="stat-box"><div class="stat-val">${mostWinsDisplay.split(' ')[0]}</div><div class="stat-val" style="font-size:0.8rem;margin-top:4px">${mostWinsDisplay.split(' ').slice(1).join(' ')}</div><div class="stat-lbl">Most Wins *</div></div>
           </div>
+          <div style="font-size:0.55rem;color:var(--text2);opacity:0.6;margin-top:6px;line-height:1.4;text-align:right">* legendary cards excluded</div>
         </div>
 
         <div>
@@ -4889,9 +5033,11 @@ function confirmResetStats() {
 
 // ===== MENU =====
 function toggleMenu() {
-  const menu = document.getElementById('game-menu');
+  const menu = document.getElementById('draft-screen').classList.contains('hidden')
+    ? document.getElementById('game-menu')
+    : document.getElementById('draft-menu');
+  if (!menu) return;
   menu.classList.toggle('open');
-  // Close when clicking outside
   if (menu.classList.contains('open')) {
     setTimeout(() => {
       document.addEventListener('click', closeMenuOutside, { once: true });
@@ -4899,12 +5045,14 @@ function toggleMenu() {
   }
 }
 function closeMenuOutside(e) {
-  const menu = document.getElementById('game-menu');
+  const menu = document.getElementById('game-menu') || document.getElementById('draft-menu');
   if (menu && !menu.contains(e.target)) closeMenu();
 }
 function closeMenu() {
-  const menu = document.getElementById('game-menu');
-  if (menu) menu.classList.remove('open');
+  ['game-menu', 'draft-menu'].forEach(id => {
+    const menu = document.getElementById(id);
+    if (menu) menu.classList.remove('open');
+  });
 }
 
 // ===== GAME LOG =====
@@ -5267,6 +5415,7 @@ function showTutorialComplete() {
         <div style="display:flex;gap:8px"><span>✦</span><span>Winner earns <strong style="color:var(--text)">both powers</strong> on type win</span></div>
         <div style="display:flex;gap:8px"><span>✦</span><span>No advantage? <strong style="color:var(--text)">Higher power wins</strong>, earns own power only</span></div>
         <div style="display:flex;gap:8px"><span>✦</span><span>Check <strong style="color:var(--text)">How to Play</strong> for all type matchups</span></div>
+        <div style="display:flex;gap:8px;margin-top:4px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07)"><span>ℹ️</span><span style="color:var(--text2);font-size:0.75rem">The pile also contains <strong style="background:linear-gradient(90deg,#90a4ae,#80deea,#f06292);-webkit-background-clip:text;-webkit-text-fill-color:transparent">legendary cards</strong> with special rules — see <strong style="color:var(--text)">How to Play</strong> for details.</span></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%">
         <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();goHome();setTimeout(startGame,50)">⚔ Begin Battle</button>
