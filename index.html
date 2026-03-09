@@ -54,6 +54,188 @@
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
   }
 
+  /* ===== ENVIRONMENT SYSTEM ===== */
+  #env-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0; transition: opacity 1.5s ease;
+  }
+  #env-bg.active { opacity: 1; }
+
+  #env-particles {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    overflow: hidden;
+  }
+
+  .env-particle {
+    position: absolute;
+    pointer-events: none;
+    animation: envFloat linear infinite;
+    opacity: 0;
+  }
+  @keyframes envFloat {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  #env-flash {
+    position: fixed; inset: 0; z-index: 999; pointer-events: none;
+    opacity: 0;
+  }
+  #env-flash.flashing {
+    animation: envFlash 0.8s ease forwards;
+  }
+  @keyframes envFlash {
+    0%   { opacity: 0; }
+    20%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  #env-slot {
+    position: absolute;
+    top: -46px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    z-index: 2;
+    perspective: 300px;
+  }
+
+  .env-card {
+    width: 62px;
+    height: 74px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+    box-shadow: 0 0 14px var(--env-glow, rgba(255,255,255,0.3)), 0 2px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+  .env-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.04);
+  }
+  .env-card.can-activate:hover { transform: scale(1.08); }
+  .env-card.can-activate {
+    animation: envGlowPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes envGlowPulse {
+    0%, 100% { box-shadow: 0 0 10px var(--env-glow, rgba(255,255,255,0.3)), 0 2px 8px rgba(0,0,0,0.4); }
+    50%       { box-shadow: 0 0 22px var(--env-glow, rgba(255,255,255,0.6)), 0 2px 8px rgba(0,0,0,0.4); }
+  }
+
+  .env-card-emoji { font-size: 1.5rem; line-height: 1; }
+  .env-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.3rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    padding: 0 3px;
+  }
+  .env-card-members {
+    font-size: 0.55rem;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .env-active-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.3rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+  }
+
+  /* Hand card reveal - opacity only, zero conflict with fan transforms */
+  @keyframes cardRevealIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .card.flip-in {
+    animation: cardRevealIn 0.4s ease-out forwards;
+  }
+
+  /* Battle start message */
+  #battle-start-msg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.4rem;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(201,168,76,0.9), 0 0 60px rgba(201,168,76,0.5);
+    letter-spacing: 6px;
+    pointer-events: none;
+    z-index: 3000;
+    opacity: 0;
+    animation: battleMsgAnim 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes battleMsgAnim {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    60%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+  }
+
+  /* Env card reveal animation */
+  @keyframes envReveal {
+    0%   { transform: rotateY(90deg); opacity: 0; }
+    30%  { opacity: 1; }
+    70%  { transform: rotateY(-6deg); }
+    85%  { transform: rotateY(2deg); }
+    100% { transform: rotateY(0deg); opacity: 1; }
+  }
+  .env-card.revealing {
+    animation: envReveal 0.6s ease-out forwards;
+  }
+
+  .env-card.activated {
+    animation: envCardPulse 2.5s ease-in-out infinite;
+    cursor: default;
+  }
+  @keyframes envCardPulse {
+    0%, 100% { box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    50%       { box-shadow: 0 0 20px var(--env-glow, rgba(255,255,255,0.5)), 0 0 8px var(--env-glow, rgba(255,255,255,0.3)); }
+  }
+
+  .card.env-boosted::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    border: 2px solid var(--env-boost-color, rgba(255,255,255,0.8));
+    box-shadow: 0 0 10px var(--env-boost-color, rgba(255,255,255,0.5));
+    animation: envBoostPulse 1s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+  @keyframes envBoostPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* Boosted power shown in green */
+  .card-power.boosted {
+    color: #80ff80 !important;
+    -webkit-text-fill-color: #80ff80 !important;
+    text-shadow: 0 0 8px rgba(100,255,100,0.8) !important;
+  }
+
   /* ===== SCREENS ===== */
   .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.6s, transform 0.6s; overflow: visible; }
   .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
@@ -622,6 +804,7 @@
   .card.selectable:hover {
     box-shadow: 0 20px 40px rgba(201,168,76,0.3);
   }
+  .card.flip-in { transition: none !important; }
 
   .card-inner {
     width: 100%;
@@ -1330,12 +1513,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 12px;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    padding: 24px 16px 16px;
-    height: 100%;
+    padding: 12px 16px 16px;
+    flex: 1;
+    min-height: 0;
     box-sizing: border-box;
   }
   .draft-header {
@@ -1425,8 +1609,9 @@
     gap: 8px;
     flex-shrink: 0;
     transform: scale(1.1);
-    transform-origin: top center;
-    margin-bottom: calc((var(--card-h) * 2 + 16px) * 0.1);
+    transform-origin: center center;
+    margin-top: calc((var(--card-h) * 2 + 16px) * 0.05);
+    margin-bottom: calc((var(--card-h) * 2 + 16px) * 0.05);
   }
   .draft-grid .draft-card-wrap:nth-child(9) { grid-column: 1 / 3; justify-self: end; }
   .draft-grid .draft-card-wrap:nth-child(10) { grid-column: 3 / 5; justify-self: start; }
@@ -2457,7 +2642,7 @@
   .tut-highlight-pulse {
     position: absolute;
     border: 2px solid rgba(201,168,76,0.8);
-    border-radius: 10px;
+    border-radius: 14px;
     pointer-events: none;
     animation: tutPulse 1.5s ease-in-out infinite;
     z-index: 2001;
@@ -2508,6 +2693,9 @@
 </head>
 <body>
 <canvas id="stars"></canvas>
+<div id="env-bg"></div>
+<div id="env-particles"></div>
+<div id="env-flash"></div>
 <div id="particles"></div>
 
 <!-- START SCREEN -->
@@ -2732,6 +2920,7 @@
         <span class="blitz-timer-count" id="blitz-timer-count">5</span>
       </div>
       <div class="battle-slot" id="cpu-slot"><span style="color:var(--text2);font-size:0.65rem;letter-spacing:2px;">CPU</span></div>
+      <div id="env-slot"></div>
       <div class="vs-divider">
         <div class="vs-text">VS</div>
         <div class="status-msg" id="status-msg">Flipping coin...</div>
@@ -2817,6 +3006,266 @@ const TYPE_EMOJI = {
   steel: '⛓️', diamond: '💎'
 };
 
+// ===== ENVIRONMENT DATA =====
+const ENVIRONMENTS = [
+  {
+    type: 'forest',
+    label: 'Forest',
+    emoji: '🌲',
+    members: ['plant', 'ground'],
+    memberEmojis: '🌿⛰️',
+    bg: 'radial-gradient(ellipse at 30% 60%, rgba(10,60,10,0.7) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(20,80,20,0.5) 0%, transparent 55%), radial-gradient(ellipse at 50% 90%, rgba(5,40,5,0.6) 0%, transparent 50%)',
+    bodyBg: '#050f05',
+    particleEmojis: ['🍃','🍀','🌿','🍂','✦'],
+    particleColor: 'rgba(80,200,80,0.6)',
+    flashColor: 'rgba(30,120,30,0.85)',
+    glowColor: 'rgba(76,175,80,0.8)',
+    boostColor: 'rgba(100,220,100,0.9)',
+    cardBg: 'linear-gradient(135deg, #0a2a0a, #1a4a1a)',
+    borderColor: 'rgba(100,200,80,0.6)',
+  },
+  {
+    type: 'ocean',
+    label: 'Ocean',
+    emoji: '🌊',
+    members: ['water', 'ice'],
+    memberEmojis: '💧❄️',
+    bg: 'radial-gradient(ellipse at 50% 80%, rgba(0,40,100,0.8) 0%, transparent 60%), radial-gradient(ellipse at 20% 20%, rgba(0,60,120,0.5) 0%, transparent 55%), radial-gradient(ellipse at 80% 50%, rgba(0,80,100,0.5) 0%, transparent 50%)',
+    bodyBg: '#000a1a',
+    particleEmojis: ['💧','🫧','❄️','·','∘'],
+    particleColor: 'rgba(30,150,220,0.6)',
+    flashColor: 'rgba(0,80,160,0.85)',
+    glowColor: 'rgba(33,150,243,0.8)',
+    boostColor: 'rgba(100,200,255,0.9)',
+    cardBg: 'linear-gradient(135deg, #001530, #002850)',
+    borderColor: 'rgba(30,150,220,0.6)',
+  },
+  {
+    type: 'atmosphere',
+    label: 'Atmosphere',
+    emoji: '🌫️',
+    members: ['electricity', 'wind'],
+    memberEmojis: '⚡💨',
+    bg: 'radial-gradient(ellipse at 50% 30%, rgba(80,50,120,0.7) 0%, transparent 55%), radial-gradient(ellipse at 20% 70%, rgba(100,80,10,0.5) 0%, transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(60,40,100,0.5) 0%, transparent 50%)',
+    bodyBg: '#08050f',
+    particleEmojis: ['⚡','✦','·','∘','~'],
+    particleColor: 'rgba(220,200,50,0.7)',
+    flashColor: 'rgba(120,80,200,0.85)',
+    glowColor: 'rgba(180,140,255,0.8)',
+    boostColor: 'rgba(255,230,80,0.9)',
+    cardBg: 'linear-gradient(135deg, #150a2a, #1e0f3a)',
+    borderColor: 'rgba(180,140,255,0.6)',
+  },
+  {
+    type: 'volcano',
+    label: 'Volcano',
+    emoji: '🌋',
+    members: ['fire', 'stone'],
+    memberEmojis: '🔥🪨',
+    bg: 'radial-gradient(ellipse at 50% 90%, rgba(120,30,0,0.8) 0%, transparent 55%), radial-gradient(ellipse at 30% 40%, rgba(80,20,0,0.6) 0%, transparent 50%), radial-gradient(ellipse at 70% 20%, rgba(60,15,0,0.5) 0%, transparent 50%)',
+    bodyBg: '#100500',
+    particleEmojis: ['🔥','✦','·','∘','💥'],
+    particleColor: 'rgba(255,100,20,0.7)',
+    flashColor: 'rgba(180,40,0,0.85)',
+    glowColor: 'rgba(255,87,34,0.8)',
+    boostColor: 'rgba(255,140,50,0.9)',
+    cardBg: 'linear-gradient(135deg, #2a0800, #3a1000)',
+    borderColor: 'rgba(255,100,30,0.6)',
+  },
+];
+
+// ===== ENVIRONMENT FUNCTIONS =====
+function getEnvDef() {
+  if (!state.environment.type) return null;
+  return ENVIRONMENTS.find(e => e.type === state.environment.type);
+}
+
+function isEnvBoosted(cardType) {
+  if (!state.environment.active) return false;
+  const env = getEnvDef();
+  if (!env) return false;
+  return env.members.includes(cardType);
+}
+
+function initEnvironment() {
+  const env = ENVIRONMENTS[Math.floor(Math.random() * ENVIRONMENTS.length)];
+  state.environment = { type: env.type, active: false };
+  // Don't render yet — shown after coin flip in beginRound
+}
+
+function renderEnvSlot() {
+  const slot = document.getElementById('env-slot');
+  if (!slot) return;
+  const env = getEnvDef();
+  if (!env) { slot.innerHTML = ''; return; }
+
+  const canActivate = !state.environment.active &&
+    (state.phase === 'play-first' || state.phase === 'play-second') &&
+    state.currentTurn === 'user';
+
+  // If no card exists yet, create it fresh
+  let cardEl = slot.querySelector('.env-card');
+  if (!cardEl) {
+    slot.innerHTML = `
+      <div class="env-card"
+           style="background:${env.cardBg}; border-color:${env.borderColor}; --env-glow:${env.glowColor}">
+        <div class="env-card-emoji">${env.emoji}</div>
+        <div class="env-card-name">${env.label}</div>
+        <div class="env-card-members">${env.memberEmojis}</div>
+      </div>
+      <div class="env-active-badge"></div>
+    `;
+    cardEl = slot.querySelector('.env-card');
+  }
+
+  // Update classes on existing element (preserves CSS transitions)
+  cardEl.classList.toggle('activated', !!state.environment.active);
+  cardEl.classList.toggle('can-activate', canActivate);
+  cardEl.onclick = canActivate ? userActivateEnvironment : null;
+
+  // Update badge text
+  const badge = slot.querySelector('.env-active-badge');
+  if (badge) {
+    if (state.environment.active) {
+      badge.textContent = '⚡ Active';
+      badge.style.color = '';
+      badge.style.opacity = '';
+    } else if (canActivate) {
+      badge.textContent = 'tap to activate';
+      badge.style.color = 'rgba(255,255,255,0.5)';
+      badge.style.opacity = '';
+    } else {
+      badge.textContent = '—';
+      badge.style.color = '';
+      badge.style.opacity = '0.3';
+    }
+  }
+}
+
+function userActivateEnvironment() {
+  if (state.environment.active) return;
+  if (state.currentTurn !== 'user') return;
+  activateEnvironment('user');
+}
+
+function activateEnvironment(by) {
+  if (state.environment.active) return;
+  state.environment.active = true;
+  const env = getEnvDef();
+
+  // Flash
+  const flash = document.getElementById('env-flash');
+  flash.style.background = env.flashColor;
+  flash.classList.remove('flashing');
+  void flash.offsetWidth;
+  flash.classList.add('flashing');
+
+  // Background
+  const bg = document.getElementById('env-bg');
+  bg.style.background = env.bg;
+  document.body.style.setProperty('--bg', env.bodyBg);
+  document.body.style.background = env.bodyBg;
+  bg.classList.add('active');
+
+  // Particles
+  startEnvParticles(env);
+
+  // Toast
+  showToast(env.emoji, `${env.label} Awakens!`, `${env.memberEmojis} cards are boosted`, env.glowColor);
+
+  // Sound
+  playSound('btn');
+
+  // Re-render slot and hands
+  renderEnvSlot();
+  renderHands();
+
+  // Apply boost glow to any cards already in battle slots
+  ['user-slot', 'cpu-slot'].forEach(slotId => {
+    const slot = document.getElementById(slotId);
+    const cardEl = slot && slot.querySelector('.card');
+    if (!cardEl) return;
+    const cardData = cardEl._cardData;
+    if (!cardData || cardData.legendary) return;
+    if (isEnvBoosted(cardData.type)) {
+      cardEl.classList.add('env-boosted');
+      cardEl.style.setProperty('--env-boost-color', env.boostColor);
+      // Also update the power display to green
+      const powerEl = cardEl.querySelector('.card-power');
+      if (powerEl) {
+        powerEl.textContent = cardData.power + 1;
+        powerEl.classList.add('boosted');
+      }
+    }
+  });
+}
+
+let _envParticleInterval = null;
+function startEnvParticles(env) {
+  if (_envParticleInterval) clearInterval(_envParticleInterval);
+  const container = document.getElementById('env-particles');
+  container.innerHTML = '';
+
+  function spawnParticle() {
+    const p = document.createElement('div');
+    p.className = 'env-particle';
+    const emojis = env.particleEmojis;
+    const isEmoji = Math.random() > 0.4;
+    if (isEmoji) {
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      p.style.fontSize = (Math.random() * 14 + 8) + 'px';
+    } else {
+      p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+      p.style.borderRadius = '50%';
+      p.style.background = env.particleColor;
+    }
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.bottom = '-20px';
+    const duration = Math.random() * 8 + 6;
+    const delay = Math.random() * 3;
+    p.style.animationDuration = duration + 's';
+    p.style.animationDelay = delay + 's';
+    container.appendChild(p);
+    setTimeout(() => p.remove(), (duration + delay) * 1000);
+  }
+
+  // Initial burst
+  for (let i = 0; i < 12; i++) setTimeout(spawnParticle, i * 150);
+  // Ongoing
+  _envParticleInterval = setInterval(spawnParticle, 600);
+}
+
+function stopEnvParticles() {
+  if (_envParticleInterval) { clearInterval(_envParticleInterval); _envParticleInterval = null; }
+  const container = document.getElementById('env-particles');
+  if (container) container.innerHTML = '';
+}
+
+function resetEnvironment() {
+  state.environment = { type: null, active: false };
+  stopEnvParticles();
+  const bg = document.getElementById('env-bg');
+  if (bg) { bg.style.background = ''; bg.classList.remove('active'); }
+  document.body.style.background = '';
+  document.body.style.removeProperty('--bg');
+  const slot = document.getElementById('env-slot');
+  if (slot) slot.innerHTML = '';
+}
+
+function cpuConsiderActivate() {
+  if (state.environment.active) return false;
+  if (state.currentTurn !== 'cpu') return false;
+  if (state.round > 5) return false;
+  const env = getEnvDef();
+  if (!env) return false;
+  const boostedCount = state.cpuHand.filter(c => env.members.includes(c.type)).length;
+  if (boostedCount >= 2 && Math.random() < 0.6) {
+    activateEnvironment('cpu');
+    return true;
+  }
+  return false;
+}
+
 // ===== GAME STATE =====
 let state = {
   stack: [],
@@ -2833,6 +3282,7 @@ let state = {
   cpuPlayedCard: null,
   drawsNeeded: [],
   gameLog: [],
+  environment: { type: null, active: false },
 };
 
 // ===== BUILD ORBITAL RING =====
@@ -3130,10 +3580,13 @@ function createCardEl(cardData, faceDown = false, onClick = null) {
     div.innerHTML = `<div class="card-inner"><div class="card-back-pattern">⚜</div></div>`;
   } else {
     const strongIcons = cardData.strong.map(t => `<span class="strong-icon">${TYPE_EMOJI[t]}</span>`).join('');
+    const boosted = !cardData.legendary && isEnvBoosted(cardData.type);
+    const displayPower = boosted ? cardData.power + 1 : cardData.power;
+    const powerClass = boosted ? 'card-power boosted' : 'card-power';
     div.innerHTML = `
       <div class="card-inner">
         <div class="card-name">${cardData.label}</div>
-        <div class="card-power">${cardData.power}</div>
+        <div class="${powerClass}">${displayPower}</div>
         <div class="card-art"><span class="card-emoji">${cardData.emoji}</span></div>
         ${strongIcons ? `<div class="card-footer"><div class="strong-icons">${strongIcons}</div></div>` : ''}
       </div>
@@ -3165,7 +3618,6 @@ function renderHands() {
   const canPlay = (state.phase === 'play-first' || state.phase === 'play-second') && state.currentTurn === 'user';
   state.userHand.forEach((card, i) => {
     const el = createCardEl(card, false, canPlay ? () => userPlayCard(i) : null);
-    el.style.animationDelay = i * 0.08 + 's';
     userHand.appendChild(el);
   });
   
@@ -3220,6 +3672,7 @@ function updateTurnIndicators() {
     userInd.className = 'turn-indicator active';
     cpuInd.className = 'turn-indicator inactive';
   }
+  renderEnvSlot();
 }
 
 function setStatus(msg, highlight = false) {
@@ -3300,6 +3753,9 @@ function startGame() {
   state.phase = 'coin';
   state.gameLog = [];
 
+  resetEnvironment();
+  initEnvironment();
+
   clearBattleSlots();
   const uhEl = document.getElementById('user-hand');
   const chEl = document.getElementById('cpu-hand');
@@ -3345,7 +3801,8 @@ function doCoinFlip() {
   setTimeout(() => {
     overlay.remove();
     state.firstPlayer = goesFirst;
-    beginRound();
+    setStatus('The battlefield awakens...');
+    setTimeout(beginRound, 200);
   }, 2800);
 }
 
@@ -3358,8 +3815,80 @@ function beginRound() {
   if (!isGameActive()) return;
   state.userPlayedCard = null;
   state.cpuPlayedCard = null;
-  state.drawsNeeded = []; // queue of who still needs to draw
+  state.drawsNeeded = [];
   clearBattleSlots();
+  renderEnvSlot();
+
+  // Round 1: staggered hand reveal → env flip → Battle!
+  if (state.round === 1) {
+    renderHands();
+
+    // Grab all hand cards, clear any animation delays, hide them
+    const allCards = [...document.querySelectorAll('#user-hand .card, #cpu-hand .card')];
+    const userCards = [...document.querySelectorAll('#user-hand .card')];
+    allCards.forEach(c => {
+      c.style.animationDelay = '0s';
+      c.style.animation = 'none';
+      c.style.opacity = '0';
+    });
+    // Disable user cards during reveal to prevent hover flicker
+    userCards.forEach(c => c.classList.add('disabled'));
+
+    // Reveal each card with stagger (120ms apart)
+    allCards.forEach((c, i) => {
+      setTimeout(() => {
+        c.style.animation = '';
+        c.style.animationDelay = '';
+        c.style.opacity = '';
+        c.classList.add('flip-in');
+        c.addEventListener('animationend', () => c.classList.remove('flip-in'), { once: true });
+      }, i * 120);
+    });
+
+    const handRevealDuration = allCards.length * 120 + 400; // last card finishes
+
+    // Re-enable user cards after reveal
+    setTimeout(() => {
+      userCards.forEach(c => c.classList.remove('disabled'));
+    }, handRevealDuration);
+
+    // Then env card flips in
+    const envSlot = document.getElementById('env-slot');
+    if (envSlot) {
+      envSlot.style.visibility = 'hidden';
+      setTimeout(() => {
+        envSlot.style.visibility = '';
+        const envCardEl = envSlot.querySelector('.env-card');
+        if (envCardEl) {
+          envCardEl.classList.add('revealing');
+          envCardEl.addEventListener('animationend', () => {
+            envCardEl.classList.remove('revealing');
+            // If user goes first, add can-activate immediately after flip
+            if (state.firstPlayer === 'user') {
+              envCardEl.classList.add('can-activate');
+              envCardEl.onclick = userActivateEnvironment;
+              const badge = envSlot.querySelector('.env-active-badge');
+              if (badge) { badge.textContent = 'tap to activate'; badge.style.color = 'rgba(255,255,255,0.5)'; }
+            }
+            // Show "Battle!" then start
+            setTimeout(() => {
+              const msg = document.createElement('div');
+              msg.id = 'battle-start-msg';
+              msg.textContent = 'Battle!';
+              document.body.appendChild(msg);
+              setTimeout(() => { msg.remove(); beginPlayPhase(); }, 1600);
+            }, 200);
+          }, { once: true });
+        } else {
+          beginPlayPhase();
+        }
+      }, handRevealDuration + 200);
+    } else {
+      beginPlayPhase();
+    }
+    return;
+  }
+
   renderHands();
 
   if (state.round > 1) {
@@ -3549,33 +4078,38 @@ function cpuPlayCard() {
   if (!isGameActive()) return;
   if (state.currentTurn !== 'cpu') return;
 
-  const idx = cpuPickCardIndex();
-  const card = state.cpuHand.splice(idx, 1)[0];
-  state.cpuPlayedCard = card;
+  const willActivate = cpuConsiderActivate();
+  const delay = willActivate ? 900 : 0;
 
-  const cpuSlot = document.getElementById('cpu-slot');
-  cpuSlot.innerHTML = '';
-  const cardEl = createCardEl(card);
-  cardEl.classList.add('played');
-  cardEl.style.setProperty('--from-y', '-60px');
-  cardEl.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
-  cpuSlot.appendChild(cardEl);
+  setTimeout(() => {
+    if (!isGameActive() || state.currentTurn !== 'cpu') return;
 
-  if (state.userPlayedCard) {
-    // CPU was second — resolve
-    setStatus('CPU played ' + card.label + '!');
-    state.phase = 'resolve';
-    renderHands();
-    setTimeout(() => { if (state.phase !== 'abandoned') resolveRound(); }, 1200);
-  } else {
-    // CPU was first — switch to user
-    setStatus('CPU played ' + card.label + '! Your turn.');
-    state.currentTurn = 'user';
-    state.phase = 'play-second';
-    updateTurnIndicators();
-    renderHands();
-    startBlitzTimer();
-  }
+    const idx = cpuPickCardIndex();
+    const card = state.cpuHand.splice(idx, 1)[0];
+    state.cpuPlayedCard = card;
+
+    const cpuSlot = document.getElementById('cpu-slot');
+    cpuSlot.innerHTML = '';
+    const cardEl = createCardEl(card);
+    cardEl.classList.add('played');
+    cardEl.style.setProperty('--from-y', '-60px');
+    cardEl.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
+    cpuSlot.appendChild(cardEl);
+
+    if (state.userPlayedCard) {
+      setStatus('CPU played ' + card.label + '!');
+      state.phase = 'resolve';
+      renderHands();
+      setTimeout(() => { if (state.phase !== 'abandoned') resolveRound(); }, 1200);
+    } else {
+      setStatus('CPU played ' + card.label + '! Your turn.');
+      state.currentTurn = 'user';
+      state.phase = 'play-second';
+      updateTurnIndicators();
+      renderHands();
+      startBlitzTimer();
+    }
+  }, delay);
 }
 
 
@@ -3623,31 +4157,68 @@ function resolveRound() {
   const uStrong = uCard.strong.includes(cCard.type);
   const cStrong = cCard.strong.includes(uCard.type);
 
+  // Environment boost (not for legendary cards)
+  const uBoosted = !uCard.legendary && isEnvBoosted(uCard.type);
+  const cBoosted = !cCard.legendary && isEnvBoosted(cCard.type);
+  const uPower = uCard.power + (uBoosted ? 1 : 0);
+  const cPower = cCard.power + (cBoosted ? 1 : 0);
+
+  // Apply env-boosted glow to played cards
+  if (uBoosted) {
+    const env = getEnvDef();
+    const uSlot = document.getElementById('user-slot');
+    const uEl = uSlot.querySelector('.card');
+    if (uEl) { uEl.classList.add('env-boosted'); uEl.style.setProperty('--env-boost-color', env.boostColor); }
+  }
+  if (cBoosted) {
+    const env = getEnvDef();
+    const cSlot = document.getElementById('cpu-slot');
+    const cEl = cSlot.querySelector('.card');
+    if (cEl) { cEl.classList.add('env-boosted'); cEl.style.setProperty('--env-boost-color', env.boostColor); }
+  }
+
   let winner = 'tie';
   let userPts = 0, cpuPts = 0;
   let reason = '';
 
-  if (uStrong && !cStrong) {
+  // If one boosted and other not — boosted wins guaranteed (unless opponent is legendary)
+  if (uBoosted && !cBoosted && !cCard.legendary) {
     winner = 'user';
-    userPts = uCard.type === 'diamond' ? uCard.power : uCard.power + cCard.power;
-    reason = uCard.type + ' beats ' + cCard.type + '!';
-  } else if (cStrong && !uStrong) {
+    userPts = uPower;
+    if (uStrong && !cStrong) userPts = uPower + cPower;
+    const envLabel = getEnvDef().label;
+    reason = `${envLabel} boosts ${uCard.label}!` + (uStrong && !cStrong ? ' (type bonus)' : '');
+  } else if (cBoosted && !uBoosted && !uCard.legendary) {
     winner = 'cpu';
-    cpuPts = cCard.type === 'diamond' ? cCard.power : uCard.power + cCard.power;
-    reason = cCard.type + ' beats ' + uCard.type + '!';
+    cpuPts = cPower;
+    if (cStrong && !uStrong) cpuPts = uPower + cPower;
+    const envLabel = getEnvDef().label;
+    reason = `${envLabel} boosts ${cCard.label}!` + (cStrong && !uStrong ? ' (type bonus)' : '');
   } else {
-    // Both strong or neither — compare power
-    if (uCard.power > cCard.power) {
+    // Both boosted or neither — normal rules with adjusted powers
+    if (uStrong && !cStrong) {
       winner = 'user';
-      userPts = uCard.power;
-      reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
-    } else if (cCard.power > uCard.power) {
+      userPts = uCard.type === 'diamond' ? uPower : uPower + cPower;
+      reason = uCard.label + ' beats ' + cCard.label + '!' + (uBoosted ? ' (+1 env)' : '');
+    } else if (cStrong && !uStrong) {
       winner = 'cpu';
-      cpuPts = cCard.power;
-      reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
+      cpuPts = cCard.type === 'diamond' ? cPower : uPower + cPower;
+      reason = cCard.label + ' beats ' + uCard.label + '!' + (cBoosted ? ' (+1 env)' : '');
     } else {
-      winner = 'tie';
-      reason = 'Tie — no points!';
+      if (uPower > cPower) {
+        winner = 'user';
+        userPts = uPower;
+        reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
+        if (uBoosted) reason += ' (+1 env)';
+      } else if (cPower > uPower) {
+        winner = 'cpu';
+        cpuPts = cPower;
+        reason = (uStrong && cStrong) ? 'Both strong — higher power wins!' : 'Higher power wins!';
+        if (cBoosted) reason += ' (+1 env)';
+      } else {
+        winner = 'tie';
+        reason = 'Tie — no points!';
+      }
     }
   }
 
@@ -3746,6 +4317,8 @@ function showGameOver() {
   const userWon = state.userScore > state.cpuScore;
   const tie = state.userScore === state.cpuScore;
 
+  resetEnvironment();
+
   const { newBestStreak } = recordGameStats(userWon, tie);
   const achievementCount = checkAchievements(userWon, tie);
 
@@ -3799,6 +4372,7 @@ function showGameOver() {
 }
 
 function goHome() {
+  resetEnvironment();
   document.getElementById('user-hand').innerHTML = '';
   document.getElementById('cpu-hand').innerHTML = '';
   clearBattleSlots();
@@ -3825,6 +4399,7 @@ function goHome() {
     round: 1, phase: 'abandoned',
     userPlayedCard: null, cpuPlayedCard: null,
     drawsNeeded: [], gameLog: [],
+    environment: { type: null, active: false },
   };
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('start-screen').classList.remove('hidden');
@@ -3833,6 +4408,9 @@ function goHome() {
 function restartGame() {
   clearBattleSlots();
   clearBlitzTimer();
+  setStatus('Flipping coin...');
+  const envSlot = document.getElementById('env-slot');
+  if (envSlot) envSlot.innerHTML = '';
 
   // Preserve current mode for rematch
   const prevBlitz    = blitz;
@@ -3856,7 +4434,12 @@ function restartGame() {
 
   if (prevDraft !== null) {
     // Re-run the full draft
+    resetEnvironment();
     document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('draft-grid').innerHTML = '';
+    document.getElementById('draft-cpu-picks').innerHTML = '';
+    document.getElementById('draft-user-picks').innerHTML = '';
     draft = { userHand: [], cpuHand: [] };
     const goesFirst = Math.random() < 0.5 ? 'user' : 'cpu';
     showDraftCoinFlip(goesFirst);
@@ -4008,6 +4591,21 @@ function openHowToPlay() {
             <div class="htp-tip"><div class="htp-tip-icon">⛓️</div><div class="htp-tip-text"><strong style="color:#90a4ae">Steel (PWR 9)</strong> has type advantage over <strong>Ice</strong> and <strong>Wind</strong>, and wins most matchups on raw power. A dominant card — but Diamond still beats it.</div></div>
             <div class="htp-tip"><div class="htp-tip-icon">💎</div><div class="htp-tip-text"><strong style="color:#80deea">Diamond (PWR 10)</strong> is invincible — no card has a type advantage against it. However, since it holds no type advantage itself, it <strong>always earns only its own 10 points</strong>, never the opponent's power on top.</div></div>
           </div>
+        </div>
+
+        <!-- ENVIRONMENT CARDS -->
+        <div>
+          <div class="htp-section-title" style="background:linear-gradient(90deg,#4caf50,#2196f3,#ff5722,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Environment Cards</div>
+          <div style="font-size:0.78rem;color:var(--text2);line-height:1.7;margin-bottom:12px">Each game, one random Environment card is in play — visible to both players from the start. Tap it on your turn to <strong style="color:var(--gold2)">activate</strong> it. Once active, it transforms the battlefield and boosts two elements for the rest of the game.</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            <div class="htp-tip"><div class="htp-tip-icon">🌲</div><div class="htp-tip-text"><strong>Forest</strong> boosts 🌿 Plant &amp; ⛰️ Ground</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">🌊</div><div class="htp-tip-text"><strong>Ocean</strong> boosts 💧 Water &amp; ❄️ Ice</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">🌫️</div><div class="htp-tip-text"><strong>Atmosphere</strong> boosts ⚡ Electricity &amp; 💨 Wind</div></div>
+            <div class="htp-tip"><div class="htp-tip-icon">🌋</div><div class="htp-tip-text"><strong>Volcano</strong> boosts 🔥 Fire &amp; 🪨 Stone</div></div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text2);line-height:1.7;margin-bottom:8px"><strong style="color:var(--gold2)">Boosted cards get +1 power</strong> and <strong style="color:var(--gold2)">automatically win the round</strong> against unboosted cards — unless the opponent plays a Legendary card.</div>
+          <div style="font-size:0.78rem;color:var(--text2);line-height:1.7;margin-bottom:8px">If <strong style="color:var(--gold2)">both</strong> cards are boosted by the same environment, the boost cancels out and normal rules apply (with +1 power each).</div>
+          <div style="font-size:0.78rem;color:var(--text2);line-height:1.7">The environment works for <strong style="color:var(--gold2)">both players equally</strong> — think carefully before activating it. You might be boosting your opponent too!</div>
         </div>
 
         <!-- TIPS -->
@@ -4374,6 +4972,9 @@ function launchDraftGame() {
   state.phase          = 'coin';
   state.drawsNeeded    = [];
   state.gameLog        = [];
+
+  resetEnvironment();
+  initEnvironment();
 
   clearBattleSlots();
   const uhEl2 = document.getElementById('user-hand');
@@ -5466,10 +6067,10 @@ function addTutHighlight(targetId, hlId) {
   const hl = document.createElement('div');
   hl.className = 'tut-highlight-pulse';
   hl.id = hlId;
-  hl.style.top    = (r.top  - 6 + window.scrollY) + 'px';
-  hl.style.left   = (r.left - 6 + window.scrollX) + 'px';
-  hl.style.width  = (r.width  + 12) + 'px';
-  hl.style.height = (r.height + 12) + 'px';
+  hl.style.top    = (r.top  - 8 + window.scrollY) + 'px';
+  hl.style.left   = (r.left - 16 + window.scrollX) + 'px';
+  hl.style.width  = (r.width  + 32) + 'px';
+  hl.style.height = (r.height + 16) + 'px';
   document.body.appendChild(hl);
 }
 
@@ -5522,7 +6123,7 @@ function showTutRoundExplainer(uCard, cCard, winner, userPts, cpuPts) {
         <div class="tut-calc">${calc}</div>
         <div class="tut-actions">
           ${isLast ? '' : '<button class="tut-skip" onclick="skipTutorial()">Skip tutorial</button>'}
-          <button class="tut-next" onclick="dismissTutExplainer(${isLast})">${isLast ? 'Finish ✦' : 'Next Round →'}</button>
+          <button class="tut-next" onclick="dismissTutExplainer(${isLast})">${isLast ? 'Next →' : 'Next Round →'}</button>
         </div>
       </div>
     `;
@@ -5537,7 +6138,7 @@ function dismissTutExplainer(isLast) {
   if (el) el.remove();
 
   if (isLast) {
-    showTutorialComplete();
+    showTutEnvExplainer();
   } else {
     // Continue to next round
     state.trash.push(state.userPlayedCard || {}, state.cpuPlayedCard || {});
@@ -5547,6 +6148,34 @@ function dismissTutExplainer(isLast) {
     clearBattleSlots();
     tutDealRound();
   }
+}
+
+function showTutEnvExplainer() {
+  const ol = document.createElement('div');
+  ol.className = 'tut-overlay tut-overlay-centered';
+  ol.id = 'tut-env-explainer';
+  ol.innerHTML = `
+    <div class="tut-backdrop tut-backdrop-block"></div>
+    <div class="tut-box" id="tut-box-env">
+      <div class="tut-step">Bonus Feature</div>
+      <div class="tut-title">🌍 Environment Cards</div>
+      <div class="tut-body">
+        Each game has a random <strong>Environment card</strong> sitting at the top of the battle zone.<br><br>
+        Tap it on your turn to <strong>activate</strong> it — the battlefield transforms and two elements get <strong>+1 power</strong> and a guaranteed round win against non-legendary cards.<br><br>
+        It boosts <strong>both players equally</strong>, so choose your moment wisely!
+      </div>
+      <div class="tut-calc" style="display:flex;flex-direction:column;gap:6px">
+        <span style="display:flex;gap:6px"><span>🌲</span><span>Forest → 🌿 Plant &amp; ⛰️ Ground</span></span>
+        <span style="display:flex;gap:6px"><span>🌊</span><span>Ocean → 💧 Water &amp; ❄️ Ice</span></span>
+        <span style="display:flex;gap:6px"><span>🌫️</span><span>Atmosphere → ⚡ Electricity &amp; 💨 Wind</span></span>
+        <span style="display:flex;gap:6px"><span>🌋</span><span>Volcano → 🔥 Fire &amp; 🪨 Stone</span></span>
+      </div>
+      <div class="tut-actions">
+        <button class="tut-next" onclick="document.getElementById('tut-env-explainer').remove(); showTutorialComplete()">Finish ✦</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(ol);
 }
 
 function showTutorialComplete() {
@@ -5566,6 +6195,7 @@ function showTutorialComplete() {
         <div style="display:flex;gap:8px"><span>✦</span><span>No advantage? <strong style="color:var(--text)">Higher power wins</strong>, earns own power only</span></div>
         <div style="display:flex;gap:8px"><span>✦</span><span>Check <strong style="color:var(--text)">How to Play</strong> for all type matchups</span></div>
         <div style="display:flex;gap:8px;margin-top:4px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07)"><span>ℹ️</span><span style="color:var(--text2);font-size:0.75rem">The pile also contains <strong style="background:linear-gradient(90deg,#90a4ae,#80deea,#f06292);-webkit-background-clip:text;-webkit-text-fill-color:transparent">legendary cards</strong> with special rules — see <strong style="color:var(--text)">How to Play</strong> for details.</span></div>
+        <div style="display:flex;gap:8px;margin-top:4px"><span>🌍</span><span style="color:var(--text2);font-size:0.75rem">Each game has a random <strong style="color:var(--text)">Environment card</strong> — tap it to activate a battlefield boost for your elements. See <strong style="color:var(--text)">How to Play</strong> for details.</span></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%">
         <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();goHome();setTimeout(startGame,50)">⚔ Begin Battle</button>
