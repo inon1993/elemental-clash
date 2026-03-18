@@ -6197,7 +6197,6 @@ function recordGameStats(userWon, tie) {
   // Per-round stats
   state.gameLog.forEach(entry => {
     const t = entry.userCard.type;
-    stats.totalCardsPlayed = (stats.totalCardsPlayed || 0) + 1;
     stats.cardPlayCount[t] = (stats.cardPlayCount[t] || 0) + 1;
     if (!entry.userCard.legendary) {
       if (entry.winner === 'user') {
@@ -6230,14 +6229,6 @@ function recordCoinFlip(userWon) {
 
 // ===== ACHIEVEMENTS =====
 const ACHIEVEMENTS = [
-  {
-    id: 'test_cards_played',
-    icon: '🧪',
-    name: 'Card Player',
-    desc: 'Play cards (test achievement)',
-    levels: [10, 20, 30, 40, 50],
-    stat: stats => stats.totalCardsPlayed || 0,
-  },
   {
     id: 'flawless',
     icon: '🏆',
