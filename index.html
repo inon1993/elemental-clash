@@ -956,7 +956,7 @@
     border-color: #90a4ae;
     background: linear-gradient(135deg, #1e2a30, #2c3e48, #37515e, #2c3e48, #1e2a30);
     background-size: 300% 300%;
-    animation: steelShimmer 3s ease infinite;
+    animation: steelShimmer 3s ease-in-out var(--steel-delay, 0s) infinite;
   }
   .card[data-type="steel"] .card-art {
     background: transparent;
@@ -970,14 +970,13 @@
     100% { background-position: 0% 0%; }
   }
 
-
   /* Diamond — animated prismatic rainbow background */
   .card[data-type="diamond"] .card-inner {
     border-color: #80deea;
     background: linear-gradient(135deg, #4a0080, #0050c0, #006080, #600090, #900040, #0040a0, #8000a0);
     background-size: 400% 400%;
-    animation: diamondPrismatic 4s linear infinite;
     box-shadow: inset 0 0 20px rgba(128,222,234,0.25);
+    animation: diamondPrismatic 4s linear var(--diamond-delay, 0s) infinite;
   }
   .card[data-type="diamond"] .card-art {
     background: transparent;
@@ -2652,6 +2651,478 @@
     50%      { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
   }
 
+  /* ===== LEVEL BADGE ===== */
+  .level-badge-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(10,10,20,0.7);
+    border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 12px;
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+    transition: border-color 0.2s, background 0.2s;
+    z-index: 10;
+  }
+  .level-badge-btn:hover { border-color: var(--gold); background: rgba(20,15,5,0.85); }
+  .level-badge-inner {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .level-badge-icon { font-size: 0.9rem; line-height: 1; }
+  .level-badge-bar-wrap {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .level-badge-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 0.6s ease;
+  }
+
+  /* ===== PLAYER PROFILE MODAL ===== */
+  .profile-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 3000;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .profile-modal {
+    background: linear-gradient(160deg, #0e0e1a, #1a1228);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px;
+    padding: 24px 20px;
+    width: min(340px, 90vw);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .profile-header {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .profile-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.8rem; color: var(--gold); letter-spacing: 2px;
+  }
+  .profile-close {
+    background: none; border: none; color: var(--text2);
+    font-size: 1.1rem; cursor: pointer; padding: 4px;
+  }
+  .profile-level-block {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 16px; background: rgba(255,255,255,0.03);
+    border-radius: 14px; border: 1px solid rgba(201,168,76,0.15);
+  }
+  .profile-level-icon { font-size: 2.5rem; line-height: 1; }
+  .profile-level-name {
+    font-family: 'Cinzel', serif; font-size: 1rem;
+    color: var(--gold); letter-spacing: 3px; text-transform: uppercase;
+  }
+  .profile-level-pct {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    color: var(--text2); letter-spacing: 1px;
+  }
+  .profile-bar-wrap {
+    width: 100%; height: 6px;
+    background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
+  }
+  .profile-bar {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .profile-next-label {
+    font-family: 'Cinzel', serif; font-size: 0.5rem;
+    color: var(--text2); letter-spacing: 1px; text-align: center;
+  }
+
+  /* ===== CARD SKIN MODAL ===== */
+  .skin-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 3000;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .skin-modal {
+    background: linear-gradient(160deg, #0e0e1a, #1a1228);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px;
+    padding: 24px 20px;
+    width: min(360px, 92vw);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .skin-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .skin-modal-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.8rem; color: var(--gold); letter-spacing: 2px;
+  }
+  .skin-modal-close {
+    background: none; border: none; color: var(--text2);
+    font-size: 1.1rem; cursor: pointer; padding: 4px;
+  }
+  .skin-options {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .skin-option {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: rgba(255,255,255,0.02);
+    position: relative;
+    overflow: hidden;
+  }
+  .skin-option.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+  .skin-option.locked {
+    opacity: 0.5; cursor: default;
+  }
+  .skin-preview {
+    width: 44px; height: 60px;
+    border-radius: 7px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgba(255,255,255,0.15);
+  }
+  .skin-preview-classic { background: linear-gradient(135deg, #1a3a1a, #2d5a2d); }
+  .skin-preview-holo {
+    background: linear-gradient(135deg, #1a1a3a, #2a1a3a);
+    overflow: hidden;
+  }
+  .skin-preview-holo::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255,100,200,0.35) 0%,
+      rgba(100,200,255,0.35) 25%,
+      rgba(200,255,100,0.35) 50%,
+      rgba(255,200,100,0.35) 75%,
+      rgba(255,100,200,0.35) 100%
+    );
+    animation: holoShift 6s linear infinite;
+  }
+  .skin-preview-cosmic {
+    background: radial-gradient(ellipse at 50% 50%, #1a0a2e, #050510);
+  }
+  .skin-preview-cosmic::after {
+    content: '·  ·    · ·  ·   ·· ·   ·';
+    position: absolute; inset: 0;
+    font-size: 6px; color: rgba(255,255,255,0.6);
+    word-break: break-all; overflow: hidden;
+    padding: 2px; line-height: 1.4;
+    letter-spacing: 2px;
+  }
+  .skin-info { flex: 1; }
+  .skin-name {
+    font-family: 'Cinzel', serif; font-size: 0.75rem;
+    color: var(--text); letter-spacing: 1px;
+  }
+  .skin-desc-text {
+    font-size: 0.65rem; color: var(--text2);
+    margin-top: 2px; line-height: 1.4;
+  }
+  .skin-lock-badge {
+    font-size: 0.55rem; color: var(--gold2);
+    font-family: 'Cinzel', serif; letter-spacing: 0.5px;
+    margin-top: 3px;
+  }
+  .skin-selected-check {
+    font-size: 1rem; color: var(--gold);
+    margin-left: auto; flex-shrink: 0;
+  }
+
+  /* ===== CARD SKIN EFFECTS ===== */
+  /* Holographic */
+  .card.skin-holo .card-inner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255,100,200,0.2) 0%,
+      rgba(100,200,255,0.2) 25%,
+      rgba(200,255,100,0.2) 50%,
+      rgba(255,200,100,0.2) 75%,
+      rgba(255,100,200,0.2) 100%
+    );
+    pointer-events: none;
+    border-radius: 10px;
+    z-index: 5;
+    animation: holoShift 3s linear var(--holo-delay, 0s) infinite;
+  }
+  @keyframes holoShift {
+    0%   { filter: hue-rotate(0deg) brightness(1); }
+    50%  { filter: hue-rotate(180deg) brightness(1.15); }
+    100% { filter: hue-rotate(360deg) brightness(1); }
+  }
+
+  /* Holo in level-up card — slower */
+  #levelup-card .skin-holo .card-inner::after,
+  .levelup-holo-demo::after {
+    animation-duration: 8s;
+  }
+
+  /* Golden Foil */
+  .card.skin-cosmic .card-inner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      115deg,
+      rgba(255,220,80,0.04) 0%,
+      rgba(255,245,160,0.35) 25%,
+      rgba(255,255,220,0.5) 50%,
+      rgba(255,245,160,0.35) 75%,
+      rgba(255,220,80,0.04) 100%
+    );
+    pointer-events: none;
+    border-radius: 10px;
+    z-index: 6;
+    animation: foilSweep 3s ease-in-out var(--rift-delay, 0s) infinite;
+  }
+  /* Subtle gold tint + corner flourishes via box-shadow inset */
+  .card.skin-cosmic .card-inner::before {
+    content: '✦';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(201,168,76,0.08) 0%,
+      rgba(255,235,120,0.06) 50%,
+      rgba(201,168,76,0.08) 100%
+    );
+    /* Corner flourishes via box-shadow */
+    box-shadow:
+      inset  6px  6px 0 -4px rgba(201,168,76,0.9),
+      inset  6px  6px 8px -6px rgba(255,235,120,0.8),
+      inset -6px  6px 0 -4px rgba(201,168,76,0.9),
+      inset -6px  6px 8px -6px rgba(255,235,120,0.8),
+      inset  6px -6px 0 -4px rgba(201,168,76,0.9),
+      inset  6px -6px 8px -6px rgba(255,235,120,0.8),
+      inset -6px -6px 0 -4px rgba(201,168,76,0.9),
+      inset -6px -6px 8px -6px rgba(255,235,120,0.8);
+    pointer-events: none;
+    border-radius: 10px;
+    z-index: 5;
+    font-size: 0; /* hide the content char */
+    animation: foilCorners 3s ease-in-out var(--rift-delay, 0s) infinite;
+  }
+  /* Gold border glow */
+  .card.skin-cosmic {
+    animation: foilBorder 3s ease-in-out var(--rift-delay, 0s) infinite;
+  }
+  /* Golden Foil */
+  .card.skin-cosmic .card-inner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      115deg,
+      rgba(255,220,80,0.04) 0%,
+      rgba(255,245,160,0.35) 25%,
+      rgba(255,255,220,0.5) 50%,
+      rgba(255,245,160,0.35) 75%,
+      rgba(255,220,80,0.04) 100%
+    );
+    pointer-events: none;
+    border-radius: 10px;
+    z-index: 6;
+    animation: foilSweep 3s ease-in-out var(--rift-delay, 0s) infinite;
+  }
+  @keyframes foilSweep {
+    0%   { filter: brightness(0.5) saturate(0.7); opacity: 0.4; }
+    50%  { filter: brightness(1.4) saturate(1.3); opacity: 1;   }
+    100% { filter: brightness(0.5) saturate(0.7); opacity: 0.4; }
+  }
+  @keyframes foilCorners {
+    0%, 100% { opacity: 0.5; }
+    50%       { opacity: 1; }
+  }
+  @keyframes foilBorder {
+    0%, 100% { box-shadow: 0 0 0 1.5px rgba(201,168,76,0.5), 0 0 10px rgba(201,168,76,0.2), 0 4px 16px rgba(0,0,0,0.5); }
+    50%       { box-shadow: 0 0 0 1.5px rgba(255,235,120,0.9), 0 0 20px rgba(201,168,76,0.5), 0 4px 16px rgba(0,0,0,0.5); }
+  }
+
+  /* Sparkle particles on golden foil cards */
+  .foil-sparkle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: radial-gradient(circle, #fff 0%, rgba(255,220,80,0.8) 50%, transparent 100%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 8;
+    animation: sparklePop var(--sp-dur, 0.8s) ease-out var(--sp-delay, 0s) forwards;
+  }
+  @keyframes sparklePop {
+    0%   { transform: scale(0) rotate(0deg);   opacity: 1; }
+    40%  { transform: scale(1.4) rotate(20deg); opacity: 1; }
+    100% { transform: scale(0) rotate(40deg);   opacity: 0; }
+  }
+
+  /* Golden Foil preview tile */
+  .skin-preview-cosmic {
+    background: linear-gradient(135deg, #1a1400, #2a2000);
+    overflow: hidden;
+    box-shadow: 0 0 0 1.5px rgba(201,168,76,0.6),
+                inset 5px 5px 0 -3px rgba(201,168,76,0.9),
+                inset -5px 5px 0 -3px rgba(201,168,76,0.9),
+                inset 5px -5px 0 -3px rgba(201,168,76,0.9),
+                inset -5px -5px 0 -3px rgba(201,168,76,0.9);
+  }
+  .skin-preview-cosmic::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      115deg,
+      rgba(255,220,80,0.1) 0%,
+      rgba(255,245,160,0.6) 25%,
+      rgba(255,255,220,0.8) 50%,
+      rgba(255,245,160,0.6) 75%,
+      rgba(255,220,80,0.1) 100%
+    );
+    animation: foilSweep 3s ease-in-out infinite;
+  }
+
+  /* ===== LEVEL UP CINEMATIC ===== */
+  #levelup-overlay {
+    position: fixed; inset: 0;
+    background: #000;
+    z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  #levelup-flash {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle, #fff 0%, #f0d080 40%, #c9a84c 70%, transparent 100%);
+    z-index: 9001;
+    pointer-events: none;
+    opacity: 0;
+    animation: levelFlash 0.7s ease-out forwards;
+  }
+  @keyframes levelFlash {
+    0%   { opacity: 0; transform: scale(0.3); }
+    30%  { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+  }
+  #levelup-card {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+    padding: 40px 32px;
+    background: linear-gradient(160deg, #0e0e1a, #1a1228);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 24px;
+    width: min(320px, 88vw);
+    opacity: 0;
+    transform: translateY(60px) scale(0.9);
+    animation: levelCardIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.5s forwards;
+    position: relative; overflow: hidden; z-index: 9002;
+  }
+  @keyframes levelCardIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #levelup-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(201,168,76,0.12) 0%,
+      rgba(240,208,128,0.18) 25%,
+      rgba(201,168,76,0.08) 50%,
+      rgba(240,208,128,0.18) 75%,
+      rgba(201,168,76,0.12) 100%
+    );
+    animation: levelShimmer 4s linear 1.2s infinite;
+    pointer-events: none;
+  }
+  @keyframes levelShimmer {
+    0%   { filter: brightness(1); opacity: 0.8; }
+    50%  { filter: brightness(1.4); opacity: 1; }
+    100% { filter: brightness(1); opacity: 0.8; }
+  }
+  .levelup-rank-text {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem; letter-spacing: 4px;
+    color: var(--gold2); text-transform: uppercase;
+    opacity: 0; animation: levelFadeIn 0.5s ease 0.9s forwards;
+  }
+  .levelup-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2rem; color: #fff; letter-spacing: 4px;
+    text-shadow: 0 0 30px rgba(201,168,76,0.8), 0 0 60px rgba(201,168,76,0.4);
+    opacity: 0; animation: levelFadeIn 0.5s ease 1s forwards;
+  }
+  .levelup-icon {
+    font-size: 4rem; line-height: 1;
+    opacity: 0; transform: scale(0);
+    animation: levelIconIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards;
+  }
+  @keyframes levelIconIn {
+    to { opacity: 1; transform: scale(1); }
+  }
+  .levelup-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem; letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0; animation: levelFadeIn 0.5s ease 1.3s forwards;
+  }
+  .levelup-unlock {
+    font-size: 0.72rem; color: var(--gold2);
+    font-family: 'Cinzel', serif; letter-spacing: 1px;
+    text-align: center; line-height: 1.5;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; padding: 8px 16px;
+    opacity: 0; animation: levelFadeIn 0.5s ease 1.5s forwards;
+  }
+  .levelup-continue {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem; letter-spacing: 2px;
+    color: var(--gold); background: none;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 10px; padding: 10px 28px;
+    cursor: pointer; text-transform: uppercase;
+    transition: background 0.2s, border-color 0.2s;
+    opacity: 0; animation: levelFadeIn 0.5s ease 1.8s forwards;
+  }
+  .levelup-continue:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+  @keyframes levelFadeIn {
+    to { opacity: 1; }
+  }
+  .levelup-particles {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9003;
+  }
+  .lu-particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: luParticle var(--dur, 2s) ease-out var(--delay, 0s) forwards;
+    opacity: 0;
+  }
+  @keyframes luParticle {
+    0%   { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx),var(--ty)) scale(0); }
+  }
+
   /* ===== EASTER EGG ===== */
   .orbit-ring.egg-clash {
     animation: none !important;
@@ -2701,6 +3172,7 @@
 <!-- START SCREEN -->
 <div class="screen" id="start-screen">
   <button class="settings-gear-btn" onclick="openSettings()" aria-label="Settings">⚙️</button>
+  <button class="level-badge-btn" id="level-badge" onclick="openPlayerProfile()" aria-label="Player Level"></button>
   <div class="game-title">
     <h1><span class="title-initial">E</span>LEMENTAL <span class="title-initial">C</span>LASH</h1>
     <p>A Game of Elements &amp; Power</p>
@@ -2724,7 +3196,16 @@
       <div class="more-title">SETTINGS</div>
     </div>
     <div class="more-items">
-      <div class="htp-section-title" style="max-width:360px;width:100%;margin-bottom:10px;">Audio &amp; Feedback</div>
+      <div class="htp-section-title" style="max-width:360px;width:100%;margin-bottom:10px;">Customization</div>
+      <div class="more-item settings-item" onclick="openCardSkinModal()" style="cursor:pointer;">
+        <span class="more-item-icon">✨</span>
+        <div class="more-item-text">
+          <div class="more-item-label">Card Skin</div>
+          <div class="more-item-desc" id="skin-desc">Choose your card appearance</div>
+        </div>
+        <span class="more-item-arrow">›</span>
+      </div>
+      <div class="htp-section-title" style="max-width:360px;width:100%;margin-bottom:10px;margin-top:8px;">Audio &amp; Feedback</div>
       <div class="more-item settings-item">
         <span class="more-item-icon">🔊</span>
         <div class="more-item-text">
@@ -3329,6 +3810,332 @@ function saveSetting(key, val) {
   try { localStorage.setItem('ec_settings', JSON.stringify(_settings)); } catch(e) {}
 }
 
+// ===== PLAYER LEVEL SYSTEM =====
+const HOLO_DURATION = 3;
+const RIFT_DURATION = 3.0;
+const STEEL_DURATION = 3;
+const DIAMOND_DURATION = 4;
+const HOLO_EPOCH = Date.now();
+
+const LEVELS = [
+  { min: 0,  max: 33,  icon: '🗡️', name: 'Apprentice',  color: '#9e9e9e' },
+  { min: 34, max: 66,  icon: '⚔️', name: 'Elementalist', color: '#ff9800' },
+  { min: 67, max: 100, icon: '👑', name: 'Ascendant',    color: '#80deea' },
+];
+const SKINS = [
+  { id: 'classic',  icon: '🃏', name: 'Classic',      desc: 'The original card design',                    requiredLevel: 0  },
+  { id: 'holo',     icon: '🌈', name: 'Holographic',  desc: 'Rainbow shimmer over your cards',              requiredLevel: 34 },
+  { id: 'cosmic',   icon: '👑', name: 'Golden Foil',  desc: 'Premium gold shimmer — the mark of a legend', requiredLevel: 67 },
+];
+const SKIN_KEY = 'ec_card_skin';
+
+function getPlayerPct() {
+  const stats = loadStats();
+  const totalLevels = ACHIEVEMENTS.reduce((sum, a) => sum + a.levels.length, 0);
+  const earnedLevels = ACHIEVEMENTS.reduce((sum, a) => sum + getAchievementLevel(a, stats), 0);
+  return totalLevels > 0 ? Math.round((earnedLevels / totalLevels) * 100) : 0;
+}
+
+function getPlayerLevel(pct) {
+  return LEVELS.slice().reverse().find(l => pct >= l.min) || LEVELS[0];
+}
+
+function getSelectedSkin() {
+  try { return localStorage.getItem(SKIN_KEY) || 'classic'; } catch(e) { return 'classic'; }
+}
+
+function setSelectedSkin(id) {
+  try { localStorage.setItem(SKIN_KEY, id); } catch(e) {}
+}
+
+function updateLevelBadge() {
+  const badge = document.getElementById('level-badge');
+  if (!badge) return;
+  const pct = getPlayerPct();
+  const level = getPlayerLevel(pct);
+  const nextLevel = LEVELS.find(l => l.min > pct);
+  const barPct = nextLevel
+    ? Math.round(((pct - level.min) / (nextLevel.min - level.min)) * 100)
+    : 100;
+  badge.innerHTML = `
+    <div class="level-badge-inner">
+      <span class="level-badge-icon">${level.icon}</span>
+      <span>${level.name}</span>
+    </div>
+    <div class="level-badge-bar-wrap">
+      <div class="level-badge-bar" style="width:${barPct}%"></div>
+    </div>
+  `;
+  badge.style.borderColor = `rgba(${hexToRgb(level.color)},0.5)`;
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+function openPlayerProfile() {
+  playSound('btn'); haptic('light');
+  const pct = getPlayerPct();
+  const level = getPlayerLevel(pct);
+  const nextLevel = LEVELS.find(l => l.min > pct);
+  const barPct = nextLevel
+    ? Math.round(((pct - level.min) / (nextLevel.min - level.min)) * 100)
+    : 100;
+  const nextLabel = nextLevel
+    ? `${nextLevel.min - pct}% until ${nextLevel.icon} ${nextLevel.name}`
+    : 'Maximum rank achieved!';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'profile-overlay';
+  overlay.innerHTML = `
+    <div class="profile-modal">
+      <div class="profile-header">
+        <div class="profile-title">Player Profile</div>
+        <button class="profile-close" onclick="this.closest('.profile-overlay').remove()">✕</button>
+      </div>
+      <div class="profile-level-block">
+        <div class="profile-level-icon">${level.icon}</div>
+        <div class="profile-level-name">${level.name}</div>
+        <div class="profile-level-pct">${pct}% Achievements Complete</div>
+        <div class="profile-bar-wrap">
+          <div class="profile-bar" style="width:0%"></div>
+        </div>
+        <div class="profile-next-label">${nextLabel}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${LEVELS.map(l => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid ${pct >= l.min ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)'}">
+            <span style="font-size:1.2rem">${l.icon}</span>
+            <div style="flex:1">
+              <div style="font-family:'Cinzel',serif;font-size:0.65rem;color:${pct >= l.min ? 'var(--gold)' : 'var(--text2)'};letter-spacing:1px">${l.name}</div>
+              <div style="font-size:0.6rem;color:var(--text2)">${l.min}% – ${l.max}%</div>
+            </div>
+            <span style="font-size:0.9rem">${pct >= l.min ? '✓' : '🔒'}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  // Animate bar in
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const bar = overlay.querySelector('.profile-bar');
+    if (bar) bar.style.width = barPct + '%';
+  }));
+}
+
+function openCardSkinModal() {
+  playSound('btn'); haptic('light');
+  const pct = getPlayerPct();
+  const selected = getSelectedSkin();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'skin-overlay';
+  overlay.innerHTML = `
+    <div class="skin-modal">
+      <div class="skin-modal-header">
+        <div class="skin-modal-title">✨ Card Skin</div>
+        <button class="skin-modal-close" onclick="this.closest('.skin-overlay').remove()">✕</button>
+      </div>
+      <div class="skin-options">
+        ${SKINS.map(s => {
+          const locked = pct < s.requiredLevel;
+          const isSelected = selected === s.id;
+          return `
+            <div class="skin-option ${isSelected ? 'selected' : ''} ${locked ? 'locked' : ''}"
+                 data-skin-id="${s.id}"
+                 onclick="${locked ? '' : `selectSkin('${s.id}')`}">
+              <div class="skin-preview skin-preview-${s.id}"></div>
+              <div class="skin-info">
+                <div class="skin-name">${s.icon} ${s.name}</div>
+                <div class="skin-desc-text">${s.desc}</div>
+                ${locked ? `<div class="skin-lock-badge">🔒 Reach ${LEVELS.find(l=>l.min===s.requiredLevel)?.name} (${s.requiredLevel}%+)</div>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function selectSkin(id) {
+  setSelectedSkin(id);
+  // Update description in settings
+  const desc = document.getElementById('skin-desc');
+  if (desc) desc.textContent = SKINS.find(s => s.id === id)?.name || 'Choose your card appearance';
+  // Update selection state in existing modal without re-rendering
+  const modal = document.querySelector('.skin-overlay');
+  if (modal) {
+    modal.querySelectorAll('.skin-option').forEach(opt => {
+      const optId = opt.dataset.skinId;
+      opt.classList.toggle('selected', optId === id);
+      if (optId === id) {
+        opt.style.borderColor = 'var(--gold)';
+      } else {
+        opt.style.borderColor = '';
+      }
+    });
+  }
+  // Re-apply to any cards currently showing
+  applySkinToHands();
+  playSound('btn'); haptic('light');
+}
+
+function applySkinToHands() {
+  const skin = getSelectedSkin();
+  document.querySelectorAll('#user-hand .card').forEach(c => {
+    c.classList.remove('skin-holo', 'skin-cosmic');
+    if (skin === 'holo') c.classList.add('skin-holo');
+    if (skin === 'cosmic') c.classList.add('skin-cosmic');
+  });
+}
+
+function showLevelUp(levelName, levelIcon, pct, onContinue) {
+  haptic('success');
+
+  // Find unlocked skin for this level
+  const unlockedSkin = SKINS.find(s => s.requiredLevel > 0 && LEVELS.find(l => l.name === levelName)?.min === s.requiredLevel);
+  const level = LEVELS.find(l => l.name === levelName);
+
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'levelup-overlay';
+
+  const unlockHtml = unlockedSkin
+    ? `<div class="levelup-unlock">${unlockedSkin.icon} ${unlockedSkin.name} skin unlocked!<br><span style="font-size:0.6rem;opacity:0.7">Find it in Settings → Customization</span></div>`
+    : '';
+
+  overlay.innerHTML = `
+    <div id="levelup-flash"></div>
+    <div class="levelup-particles" id="lu-particles"></div>
+    <div id="levelup-card">
+      <div class="levelup-rank-text">Rank Up!</div>
+      <div class="levelup-title">RANK UP!</div>
+      <div class="levelup-icon">${levelIcon}</div>
+      <div class="levelup-name" style="color:${level?.color || 'var(--gold)'}">${levelName}</div>
+      <div style="font-size:0.6rem;color:var(--text2);font-family:'Cinzel',serif;letter-spacing:1px;opacity:0;animation:levelFadeIn 0.5s ease 1.4s forwards">${pct}% achievements complete</div>
+      ${unlockHtml}
+      <button class="levelup-continue" onclick="dismissLevelUp()">Continue →</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Store callback
+  overlay._onContinue = onContinue;
+
+  // Play music sting
+  playLevelUpSound();
+
+  // Spawn particles after flash
+  setTimeout(() => spawnLevelUpParticles(level?.color || '#c9a84c'), 400);
+}
+
+function dismissLevelUp() {
+  const overlay = document.getElementById('levelup-overlay');
+  if (!overlay) return;
+  const cb = overlay._onContinue;
+  overlay.style.transition = 'opacity 0.4s ease';
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.remove();
+    if (cb) cb();
+  }, 400);
+}
+
+function spawnLevelUpParticles(color) {
+  const container = document.getElementById('lu-particles');
+  if (!container) return;
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'lu-particle';
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const dist = 80 + Math.random() * 200;
+    p.style.cssText = `
+      left:${cx}px; top:${cy}px;
+      background:${Math.random() > 0.5 ? color : '#fff'};
+      --tx:${Math.cos(angle)*dist}px;
+      --ty:${Math.sin(angle)*dist}px;
+      --dur:${0.8 + Math.random()*1.2}s;
+      --delay:${Math.random()*0.4}s;
+      width:${4 + Math.random()*6}px;
+      height:${4 + Math.random()*6}px;
+    `;
+    container.appendChild(p);
+  }
+}
+
+function playLevelUpSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Ascending triumphant sting: C-E-G-C
+    const notes = [261.63, 329.63, 392.00, 523.25];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.18;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t); osc.stop(t + 0.5);
+    });
+    // Final shimmer chord
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + 0.72;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.12, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      osc.start(t); osc.stop(t + 1.2);
+    });
+  } catch(e) {}
+}
+
+function getHoloDelay()    { return '-' + ((Date.now() - HOLO_EPOCH) / 1000 % HOLO_DURATION).toFixed(3) + 's'; }
+function getRiftDelay()    { return '-' + ((Date.now() - HOLO_EPOCH) / 1000 % RIFT_DURATION).toFixed(3) + 's'; }
+function getSteelDelay()   { return '-' + ((Date.now() - HOLO_EPOCH) / 1000 % STEEL_DURATION).toFixed(3) + 's'; }
+function getDiamondDelay() { return '-' + ((Date.now() - HOLO_EPOCH) / 1000 % DIAMOND_DURATION).toFixed(3) + 's'; }
+
+// Sparkle system for Golden Foil
+let _sparkleInterval = null;
+function startFoilSparkles() {
+  stopFoilSparkles();
+  _sparkleInterval = setInterval(() => {
+    const cards = document.querySelectorAll('#user-hand .card.skin-cosmic, #user-slot .card.skin-cosmic');
+    cards.forEach(card => {
+      if (Math.random() < 0.6) spawnFoilSparkle(card);
+    });
+  }, 400);
+}
+function stopFoilSparkles() {
+  if (_sparkleInterval) { clearInterval(_sparkleInterval); _sparkleInterval = null; }
+}
+function spawnFoilSparkle(card) {
+  const s = document.createElement('div');
+  s.className = 'foil-sparkle';
+  const w = card.offsetWidth, h = card.offsetHeight;
+  s.style.cssText = `
+    left: ${6 + Math.random() * (w - 12)}px;
+    top:  ${6 + Math.random() * (h - 12)}px;
+    --sp-dur: ${0.5 + Math.random() * 0.6}s;
+    --sp-delay: ${Math.random() * 0.2}s;
+    width: ${3 + Math.random() * 4}px;
+    height: ${3 + Math.random() * 4}px;
+  `;
+  card.appendChild(s);
+  s.addEventListener('animationend', () => s.remove(), { once: true });
+}
+
 function openSettings() {
   playSound('btn'); haptic('light');
   history.pushState({ screen: 'settings' }, '');
@@ -3359,9 +4166,14 @@ function confirmResetGameData() {
   try {
     localStorage.removeItem('elemental_clash_stats');
     localStorage.removeItem(TUTORIAL_KEY);
+    localStorage.removeItem(SKIN_KEY);
   } catch(e) {}
   document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
   haptic('medium');
+  // Update skin desc back to Classic
+  const skinDesc = document.getElementById('skin-desc');
+  if (skinDesc) skinDesc.textContent = 'Classic';
+  updateLevelBadge();
   closeSettings();
   setTimeout(() => showToast('🗑️', 'Data Reset', 'All game data cleared', 'rgba(255,80,80,0.4)'), 300);
 }
@@ -3593,6 +4405,11 @@ function createCardEl(cardData, faceDown = false, onClick = null) {
     `;
   }
   div._cardData = cardData;
+  // Sync legendary card animations to avoid restart flicker
+  if (!faceDown && cardData) {
+    if (cardData.type === 'steel')   div.style.setProperty('--steel-delay',   getSteelDelay());
+    if (cardData.type === 'diamond') div.style.setProperty('--diamond-delay', getDiamondDelay());
+  }
   if (onClick) {
     div.addEventListener('click', onClick);
     div.classList.add('selectable');
@@ -3616,10 +4433,22 @@ function renderHands() {
   userHand.innerHTML = '';
   userHand.dataset.count = state.userHand.length;
   const canPlay = (state.phase === 'play-first' || state.phase === 'play-second') && state.currentTurn === 'user';
+  const skin = getSelectedSkin();
   state.userHand.forEach((card, i) => {
     const el = createCardEl(card, false, canPlay ? () => userPlayCard(i) : null);
+    if (skin === 'holo') {
+      el.classList.add('skin-holo');
+      el.style.setProperty('--holo-delay', getHoloDelay());
+    }
+    if (skin === 'cosmic') {
+      el.classList.add('skin-cosmic');
+      el.style.setProperty('--rift-delay', getRiftDelay());
+    }
     userHand.appendChild(el);
   });
+  // Start sparkles if golden foil skin active
+  if (skin === 'cosmic') startFoilSparkles();
+  else stopFoilSparkles();
   
   document.getElementById('cpu-score').textContent = state.cpuScore;
   document.getElementById('user-score').textContent = state.userScore;
@@ -3823,12 +4652,11 @@ function beginRound() {
   if (state.round === 1) {
     renderHands();
 
-    // Grab all hand cards, clear any animation delays, hide them
+    // Grab all hand cards, hide them
     const allCards = [...document.querySelectorAll('#user-hand .card, #cpu-hand .card')];
     const userCards = [...document.querySelectorAll('#user-hand .card')];
     allCards.forEach(c => {
       c.style.animationDelay = '0s';
-      c.style.animation = 'none';
       c.style.opacity = '0';
     });
     // Disable user cards during reveal to prevent hover flicker
@@ -3837,15 +4665,16 @@ function beginRound() {
     // Reveal each card with stagger (120ms apart)
     allCards.forEach((c, i) => {
       setTimeout(() => {
-        c.style.animation = '';
         c.style.animationDelay = '';
-        c.style.opacity = '';
-        c.classList.add('flip-in');
-        c.addEventListener('animationend', () => c.classList.remove('flip-in'), { once: true });
+        c.style.transition = 'opacity 0.4s ease-out';
+        c.style.opacity = '1';
+        c.addEventListener('transitionend', () => {
+          c.style.transition = '';
+        }, { once: true });
       }, i * 120);
     });
 
-    const handRevealDuration = allCards.length * 120 + 400; // last card finishes
+    const handRevealDuration = allCards.length * 120 + 400;
 
     // Re-enable user cards after reveal
     setTimeout(() => {
@@ -4128,6 +4957,15 @@ function userPlayCard(index) {
   userSlot.innerHTML = '';
   const cardEl = createCardEl(card);
   cardEl.classList.add('played');
+  const skin = getSelectedSkin();
+  if (skin === 'holo') {
+    cardEl.classList.add('skin-holo');
+    cardEl.style.setProperty('--holo-delay', getHoloDelay());
+  }
+  if (skin === 'cosmic') {
+    cardEl.classList.add('skin-cosmic');
+    cardEl.style.setProperty('--rift-delay', getRiftDelay());
+  }
   cardEl.style.setProperty('--from-y', '60px');
   cardEl.style.animation = 'cardSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
   userSlot.appendChild(cardEl);
@@ -4319,8 +5157,16 @@ function showGameOver() {
 
   resetEnvironment();
 
+  const prevPct = getPlayerPct();
+  const prevLevel = getPlayerLevel(prevPct);
+
   const { newBestStreak } = recordGameStats(userWon, tie);
   const achievementCount = checkAchievements(userWon, tie);
+
+  // Check if player leveled up
+  const newPct = getPlayerPct();
+  const newLevel = getPlayerLevel(newPct);
+  const leveledUp = newLevel.name !== prevLevel.name;
 
   if (newBestStreak) {
     const delay = achievementCount > 0 ? achievementCount * 3800 : 800;
@@ -4362,9 +5208,9 @@ function showGameOver() {
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();restartGame()">Play Again</button>
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').remove();${leveledUp?`showLevelUp('${newLevel.name}','${newLevel.icon}','${newPct}',()=>restartGame())`:'restartGame()'}">Play Again</button>
         <button class="modal-btn modal-btn-secondary" onclick="openGameLog()">📜 Game Log</button>
-        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();goHome()">⌂ Home</button>
+        <button class="modal-btn modal-btn-secondary" onclick="this.closest('.modal-overlay').remove();${leveledUp?`showLevelUp('${newLevel.name}','${newLevel.icon}','${newPct}',()=>goHome())`:'goHome()'}">⌂ Home</button>
       </div>
     </div>
   `;
@@ -4403,11 +5249,14 @@ function goHome() {
   };
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('start-screen').classList.remove('hidden');
+  stopFoilSparkles();
+  updateLevelBadge();
 }
 
 function restartGame() {
   clearBattleSlots();
   clearBlitzTimer();
+  stopFoilSparkles();
   setStatus('Flipping coin...');
   const envSlot = document.getElementById('env-slot');
   if (envSlot) envSlot.innerHTML = '';
@@ -5277,7 +6126,7 @@ const STATS_KEY = 'elemental_clash_stats';
 function loadStats() {
   try {
     const raw = localStorage.getItem(STATS_KEY);
-    return raw ? JSON.parse(raw) : defaultStats();
+    return raw ? { ...defaultStats(), ...JSON.parse(raw) } : defaultStats();
   } catch { return defaultStats(); }
 }
 
@@ -5488,6 +6337,7 @@ function checkAchievements(userWon, tie) {
     });
   }
 
+  updateLevelBadge();
   return newlyUnlocked.length;
 }
 
@@ -5629,7 +6479,7 @@ function openStats() {
   // Favorite card (most played)
   let favCard = '—';
   let favCount = 0;
-  Object.entries(stats.cardPlayCount).forEach(([type, count]) => {
+  Object.entries(stats.cardPlayCount || {}).forEach(([type, count]) => {
     if (count > favCount) { favCount = count; favCard = type; }
   });
   const favCardData = CARDS.find(c => c.type === favCard);
@@ -5638,7 +6488,7 @@ function openStats() {
   // Most wins card
   let mostWinsCard = '—';
   let mostWins = 0;
-  Object.entries(stats.cardWinCount).forEach(([type, wins]) => {
+  Object.entries(stats.cardWinCount || {}).forEach(([type, wins]) => {
     const card = CARDS.find(c => c.type === type);
     if (card && card.legendary) return;
     if (wins > mostWins) { mostWins = wins; mostWinsCard = type; }
@@ -6221,6 +7071,11 @@ function skipTutorial() {
 buildStartPreview();
 initEasterEgg();
 loadSettings();
+updateLevelBadge();
+// Set skin desc on load
+const _skinDesc = document.getElementById('skin-desc');
+if (_skinDesc) _skinDesc.textContent = SKINS.find(s => s.id === getSelectedSkin())?.name || 'Choose your card appearance';
+
 </script>
 </body>
 </html>
