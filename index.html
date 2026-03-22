@@ -6318,13 +6318,13 @@ function checkAchievements(userWon, tie, prevLevels = null) {
       if (cpuRunning - userRunning > maxDeficit) maxDeficit = cpuRunning - userRunning;
     });
     if (maxDeficit >= 10) stats.comebacks = (stats.comebacks || 0) + 1;
-
-    // Perfect Read (accumulate across games)
-    const readsThisGame = state.gameLog.filter(r =>
-      r.winner === 'user' && r.userCard.strong.includes(r.cpuCard.type)
-    ).length;
-    stats.totalPerfectReads = (stats.totalPerfectReads || 0) + readsThisGame;
   }
+
+  // Perfect Read — counts every round won with type advantage, win or lose
+  const readsThisGame = state.gameLog.filter(r =>
+    r.winner === 'user' && r.userCard.strong.includes(r.cpuCard.type)
+  ).length;
+  stats.totalPerfectReads = (stats.totalPerfectReads || 0) + readsThisGame;
 
   saveStats(stats);
 
